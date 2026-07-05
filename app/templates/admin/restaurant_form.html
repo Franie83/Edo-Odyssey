@@ -1,27 +1,153 @@
 {% extends "admin/base.html" %}
+
 {% block title %}{{ title }} – Admin{% endblock %}
 {% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Manage restaurant listings{% endblock %}
+
 {% block content %}
-<div class="col-lg-8">
-  <div class="card border-0 shadow-sm">
-    <div class="card-body p-4">
-      <form method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="row g-3">
-          <div class="col-12"><label class="form-label fw-semibold small">Name *</label><input type="text" name="name" class="form-control" value="{{ restaurant.name if restaurant else '' }}" required></div>
-          <div class="col-md-6"><label class="form-label fw-semibold small">Cuisine *</label><input type="text" name="cuisine" class="form-control" value="{{ restaurant.cuisine if restaurant else '' }}" required placeholder="Traditional Edo, Continental…"></div>
-          <div class="col-md-6"><label class="form-label fw-semibold small">Price Range</label><select name="price_range" class="form-select">{% for p in ['₦','₦₦','₦₦₦','₦₦₦₦'] %}<option value="{{ p }}" {% if restaurant and restaurant.price_range==p %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></div>
-          <div class="col-12"><label class="form-label fw-semibold small">Address *</label><input type="text" name="address" class="form-control" value="{{ restaurant.address if restaurant else '' }}" required></div>
-          <div class="col-12"><label class="form-label fw-semibold small">Description *</label><textarea name="description" class="form-control" rows="4" required>{{ restaurant.description if restaurant else '' }}</textarea></div>
-          <div class="col-md-6"><label class="form-label fw-semibold small">Opening Hours</label><input type="text" name="opening_hours" class="form-control" value="{{ restaurant.opening_hours if restaurant else '' }}" placeholder="Daily 8AM–10PM"></div>
-          <div class="col-md-6"><label class="form-label fw-semibold small">Contact</label><input type="text" name="contact" class="form-control" value="{{ restaurant.contact if restaurant else '' }}"></div>
-          <div class="col-md-6"><label class="form-label fw-semibold small">Latitude *</label><input type="number" name="latitude" step="any" class="form-control" value="{{ restaurant.latitude if restaurant else 6.34 }}" required></div>
-          <div class="col-md-6"><label class="form-label fw-semibold small">Longitude *</label><input type="number" name="longitude" step="any" class="form-control" value="{{ restaurant.longitude if restaurant else 5.62 }}" required></div>
-          <div class="col-12"><label class="form-label fw-semibold small">Image URL (or upload)</label><input type="url" name="image_url" class="form-control mb-1" value="{{ restaurant.image_url if restaurant else '' }}" placeholder="https://…"><input type="file" name="image" class="form-control" accept="image/*"></div>
-          <div class="col-12"><div class="form-check form-switch"><input type="checkbox" name="featured" class="form-check-input" id="featSw" {% if restaurant and restaurant.featured %}checked{% endif %}><label class="form-check-label" for="featSw">Featured</label></div></div>
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+          
+          <div class="row g-3">
+            <!-- User Selection (only for new restaurants) -->
+            {% if not restaurant %}
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Select Restaurant Owner *</label>
+              <select name="user_id" class="form-select" required>
+                <option value="">-- Select a user --</option>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.full_name }} ({{ user.email }}) - Current Role: {{ user.role }}</option>
+                {% endfor %}
+              </select>
+              <div class="form-text small">
+                <i class="bi bi-info-circle me-1"></i>
+                Only users without a restaurant profile are shown. Their role will be updated to "Restaurant" upon creation.
+              </div>
+            </div>
+            {% endif %}
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Restaurant Name *</label>
+              <input type="text" name="name" class="form-control" value="{{ restaurant.name if restaurant else '' }}" required>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Address *</label>
+              <input type="text" name="address" class="form-control" value="{{ restaurant.address if restaurant else '' }}" required>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Description *</label>
+              <textarea name="description" class="form-control" rows="4" required>{{ restaurant.description if restaurant else '' }}</textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Cuisine *</label>
+              <input type="text" name="cuisine" class="form-control" value="{{ restaurant.cuisine if restaurant else '' }}" placeholder="Nigerian, Continental, Chinese" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Opening Hours</label>
+              <input type="text" name="opening_hours" class="form-control" value="{{ restaurant.opening_hours if restaurant else '' }}" placeholder="Mon–Sat 9AM–10PM">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">Price Range</label>
+              <select name="price_range" class="form-select">
+                <option value="₦" {% if restaurant and restaurant.price_range == '₦' %}selected{% endif %}>₦ (Budget)</option>
+                <option value="₦₦" {% if restaurant and restaurant.price_range == '₦₦' %}selected{% endif %}>₦₦ (Moderate)</option>
+                <option value="₦₦₦" {% if restaurant and restaurant.price_range == '₦₦₦' %}selected{% endif %}>₦₦₦ (Expensive)</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">Latitude *</label>
+              <input type="number" name="latitude" step="any" class="form-control" value="{{ restaurant.latitude if restaurant else 6.34 }}" required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">Longitude *</label>
+              <input type="number" name="longitude" step="any" class="form-control" value="{{ restaurant.longitude if restaurant else 5.62 }}" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Contact</label>
+              <input type="text" name="contact" class="form-control" value="{{ restaurant.contact if restaurant else '' }}" placeholder="Phone number">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Website</label>
+              <input type="url" name="website" class="form-control" value="{{ restaurant.website if restaurant else '' }}" placeholder="https://…">
+            </div>
+
+            <!-- Image Upload Section -->
+            <div class="col-12">
+              <div class="card bg-light">
+                <div class="card-header">
+                  <h6 class="mb-0"><i class="bi bi-image me-2"></i>Restaurant Image</h6>
+                </div>
+                <div class="card-body">
+                  {% if restaurant and restaurant.image_url %}
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold small">Current Image</label>
+                    <div>
+                      <img src="{{ restaurant.image_url }}" class="img-thumbnail" style="max-height:200px;max-width:100%;object-fit:cover" alt="{{ restaurant.name }}">
+                    </div>
+                  </div>
+                  {% endif %}
+                  <div class="mb-2">
+                    <label class="form-label fw-semibold small">
+                      {% if restaurant and restaurant.image_url %}Replace Image{% else %}Upload Image{% endif %}
+                    </label>
+                    <input type="file" name="image" class="form-control" accept="image/*">
+                    <div class="form-text small">Supported formats: JPG, PNG, GIF, WebP. Max size: 16MB.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-check form-switch">
+                <input type="checkbox" name="featured" class="form-check-input" id="featuredSwitch" {% if restaurant and restaurant.featured %}checked{% endif %}>
+                <label class="form-check-label" for="featuredSwitch">Featured</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-gold px-4">
+              <i class="bi bi-save me-1"></i>Save Restaurant
+            </button>
+            <a href="{{ url_for('admin.restaurants') }}" class="btn btn-outline-secondary">
+              <i class="bi bi-x-circle me-1"></i>Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar info -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold text-blue mb-3"><i class="bi bi-info-circle me-2"></i>Restaurant Information</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-2"><i class="bi bi-shop me-2 text-gold"></i>Restaurants are linked to user accounts</li>
+          <li class="mb-2"><i class="bi bi-person me-2 text-gold"></i>User role will be updated to "Restaurant"</li>
+          <li class="mb-2"><i class="bi bi-menu-app me-2 text-gold"></i>Menus can be added after creation</li>
+          <li class="mb-2"><i class="bi bi-check-circle me-2 text-gold"></i>Only active restaurants appear on the public site</li>
+        </ul>
+        <hr>
+        <div class="text-muted small">
+          <p class="mb-1"><i class="bi bi-clock me-1"></i>Created: {{ restaurant.created_at.strftime('%d %b %Y %H:%M') if restaurant and restaurant.created_at else '—' }}</p>
+          <p class="mb-0"><i class="bi bi-pencil me-1"></i>Updated: {{ restaurant.updated_at.strftime('%d %b %Y %H:%M') if restaurant and restaurant.updated_at else '—' }}</p>
         </div>
-        <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-gold px-4">Save Restaurant</button><a href="{{ url_for('admin.restaurants') }}" class="btn btn-outline-secondary">Cancel</a></div>
-      </form>
+      </div>
     </div>
   </div>
 </div>

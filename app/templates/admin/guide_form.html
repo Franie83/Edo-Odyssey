@@ -13,6 +13,7 @@
         <div class="mb-4 p-3 bg-blue-100 rounded-3">
           <div class="fw-bold text-blue">{{ guide.user.full_name }}</div>
           <div class="text-muted small">{{ guide.user.email }}</div>
+          <div class="text-muted small">Current Role: <span class="badge bg-blue-100 text-blue">{{ guide.user.role }}</span></div>
         </div>
         {% endif %}
 
@@ -27,10 +28,13 @@
               <select name="user_id" class="form-select" required>
                 <option value="">-- Select a user --</option>
                 {% for user in users %}
-                <option value="{{ user.id }}">{{ user.full_name }} ({{ user.email }})</option>
+                <option value="{{ user.id }}">{{ user.full_name }} ({{ user.email }}) - Current Role: {{ user.role }}</option>
                 {% endfor %}
               </select>
-              <div class="form-text small">Only users with Guide, Admin, or Super Admin roles are shown.</div>
+              <div class="form-text small">
+                <i class="bi bi-info-circle me-1"></i>
+                Only users without a guide profile are shown. Their role will be updated to "Guide" upon creation.
+              </div>
             </div>
             {% endif %}
 
@@ -115,6 +119,7 @@
           <li class="mb-2"><i class="bi bi-check-circle me-2 text-gold"></i>Only approved guides appear on the public site</li>
           <li class="mb-2"><i class="bi bi-currency-naira me-2 text-gold"></i>Rates are displayed on the guide profile</li>
           <li class="mb-2"><i class="bi bi-tag me-2 text-gold"></i>Specializations help users find the right guide</li>
+          <li class="mb-2"><i class="bi bi-shield-check me-2 text-gold"></i>User role will be automatically updated to "Guide"</li>
         </ul>
         <hr>
         <div class="text-muted small">

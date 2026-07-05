@@ -171,8 +171,20 @@ def attractions():
 @admin_required
 def attraction_create():
     categories = Category.query.filter_by(type="attraction", status="active").all()
+    
+    # Get all active users
+    users = User.query.filter(User.status == 'active').all()
+    
     if request.method == "POST":
         try:
+            user_id = request.form.get("user_id", type=int)
+            
+            # Update user role to Attraction Manager (optional)
+            if user_id:
+                user = User.query.get(user_id)
+                # You can add a new role "Attraction Manager" or keep as Tourist
+                # For now, we'll just link the user
+            
             # Handle image upload - only from file upload
             image = request.files.get("image")
             image_url = None
@@ -180,6 +192,7 @@ def attraction_create():
                 image_url = save_uploaded_file(image, "attractions")
             
             a = Attraction(
+                user_id=user_id,  # Link attraction to user
                 name=request.form.get("name", "").strip(),
                 category_id=request.form.get("category_id", type=int),
                 description=request.form.get("description", ""),
@@ -211,8 +224,7 @@ def attraction_create():
             flash(f"Error creating attraction: {str(e)}", "danger")
             db.session.rollback()
     
-    return render_template("admin/attraction_form.html", attraction=None, categories=categories, title="New Attraction")
-
+    return render_template("admin/attraction_form.html", attraction=None, categories=categories, users=users, title="New Attraction")
 
 @admin_bp.route("/attractions/<int:id>/edit", methods=["GET", "POST"])
 @login_required
@@ -220,10 +232,12 @@ def attraction_create():
 def attraction_edit(id):
     a = Attraction.query.get_or_404(id)
     categories = Category.query.filter_by(type="attraction", status="active").all()
+    users = User.query.filter(User.status == 'active').all()
     
     if request.method == "POST":
         try:
             # Update basic fields
+            a.user_id = request.form.get("user_id", type=int)  # Add this
             a.name = request.form.get("name", a.name).strip()
             a.category_id = request.form.get("category_id", a.category_id, type=int)
             a.description = request.form.get("description", a.description)
@@ -261,8 +275,7 @@ def attraction_edit(id):
             flash(f"Error updating attraction: {str(e)}", "danger")
             db.session.rollback()
     
-    return render_template("admin/attraction_form.html", attraction=a, categories=categories, title="Edit Attraction")
-
+    return render_template("admin/attraction_form.html", attraction=a, categories=categories, users=users, title="Edit Attraction")
 
 @admin_bp.route("/attractions/<int:id>/delete", methods=["POST"])
 @login_required
@@ -395,28 +408,34 @@ def guides():
 @login_required
 @admin_required
 def guide_create():
-    # Get all users with 'Guide' role or allow selection
+    # Get all active users who don't have a guide profile yet
     users = User.query.filter(
-        User.role.in_(['Guide', 'Admin', 'Super Admin']), 
         User.status == 'active'
     ).all()
+    
+    # Filter out users who already have a guide profile
+    available_users = []
+    for user in users:
+        if not Guide.query.filter_by(user_id=user.id).first():
+            available_users.append(user)
     
     if request.method == "POST":
         user_id = request.form.get("user_id", type=int)
         if not user_id:
             flash("Please select a user for this guide.", "danger")
-            return render_template("admin/guide_form.html", guide=None, users=users, title="Add Guide")
+            return render_template("admin/guide_form.html", guide=None, users=available_users, title="Add Guide")
         
         # Check if user already has a guide profile
         existing = Guide.query.filter_by(user_id=user_id).first()
         if existing:
             flash("This user already has a guide profile.", "danger")
-            return render_template("admin/guide_form.html", guide=None, users=users, title="Add Guide")
+            return render_template("admin/guide_form.html", guide=None, users=available_users, title="Add Guide")
         
         try:
+            # Create guide profile
             g = Guide(
                 user_id=user_id,
-                phone=request.form.get("phone", "").strip(),  # <-- Added phone field
+                phone=request.form.get("phone", "").strip(),
                 bio=request.form.get("bio", ""),
                 languages=request.form.get("languages", ""),
                 experience=int(request.form.get("experience", 0)),
@@ -429,6 +448,13 @@ def guide_create():
             )
             db.session.add(g)
             db.session.commit()
+            
+            # Update user role to Guide
+            user = User.query.get(user_id)
+            if user and user.role == "Tourist":
+                user.role = "Guide"
+                db.session.commit()
+            
             log_action(f"Admin created guide for user #{user_id}", module="admin.guides", record_id=g.id)
             flash("Guide created successfully.", "success")
             return redirect(url_for("admin.guides"))
@@ -436,8 +462,7 @@ def guide_create():
             db.session.rollback()
             flash(f"Error creating guide: {str(e)}", "danger")
     
-    return render_template("admin/guide_form.html", guide=None, users=users, title="Add Guide")
-
+    return render_template("admin/guide_form.html", guide=None, users=available_users, title="Add Guide")
 
 @admin_bp.route("/guides/<int:id>/edit", methods=["GET", "POST"])
 @login_required
@@ -448,7 +473,7 @@ def guide_edit(id):
     if request.method == "POST":
         try:
             g.bio = request.form.get("bio", g.bio)
-            g.phone = request.form.get("phone", g.phone).strip()  # <-- Added phone field
+            g.phone = request.form.get("phone", g.phone).strip()
             g.languages = request.form.get("languages", g.languages)
             g.experience = int(request.form.get("experience", g.experience))
             g.hourly_rate = float(request.form.get("hourly_rate", g.hourly_rate))
@@ -466,7 +491,6 @@ def guide_edit(id):
             flash(f"Error updating guide: {str(e)}", "danger")
     
     return render_template("admin/guide_form.html", guide=g, title="Edit Guide")
-
 
 @admin_bp.route("/guides/<int:id>/verify", methods=["POST"])
 @login_required
@@ -512,12 +536,29 @@ def hotels():
 @login_required
 @admin_required
 def hotel_create():
+    # Get all active users who don't have a hotel profile yet
+    users = User.query.filter(User.status == 'active').all()
+    
+    # Filter out users who already have a hotel profile
+    available_users = []
+    for user in users:
+        if not Hotel.query.filter_by(user_id=user.id).first():
+            available_users.append(user)
+    
     if request.method == "POST":
+        user_id = request.form.get("user_id", type=int)
         image = request.files.get("image")
         image_url = None
         if image and allowed_file(image.filename):
             image_url = save_uploaded_file(image, "hotels")
+        
+        # Update user role to Hotel
+        user = User.query.get(user_id)
+        if user and user.role == "Tourist":
+            user.role = "Hotel"
+        
         h = Hotel(
+            user_id=user_id,  # Link hotel to user
             name=request.form.get("name", "").strip(),
             address=request.form.get("address", ""),
             description=request.form.get("description", ""),
@@ -536,9 +577,10 @@ def hotel_create():
         db.session.add(h)
         db.session.commit()
         log_action(f"Admin created hotel: {h.name}", module="admin.hotels", record_id=h.id)
-        flash(f"Hotel '{h.name}' created.", "success")
+        flash(f"Hotel '{h.name}' created successfully.", "success")
         return redirect(url_for("admin.hotels"))
-    return render_template("admin/hotel_form.html", hotel=None, title="New Hotel")
+    
+    return render_template("admin/hotel_form.html", hotel=None, users=available_users, title="New Hotel")
 
 
 @admin_bp.route("/hotels/<int:id>/edit", methods=["GET", "POST"])
@@ -604,12 +646,29 @@ def restaurants():
 @login_required
 @admin_required
 def restaurant_create():
+    # Get all active users who don't have a restaurant profile yet
+    users = User.query.filter(User.status == 'active').all()
+    
+    # Filter out users who already have a restaurant profile
+    available_users = []
+    for user in users:
+        if not Restaurant.query.filter_by(user_id=user.id).first():
+            available_users.append(user)
+    
     if request.method == "POST":
+        user_id = request.form.get("user_id", type=int)
         image = request.files.get("image")
         image_url = None
         if image and allowed_file(image.filename):
             image_url = save_uploaded_file(image, "restaurants")
+        
+        # Update user role to Restaurant
+        user = User.query.get(user_id)
+        if user and user.role == "Tourist":
+            user.role = "Restaurant"
+        
         r = Restaurant(
+            user_id=user_id,  # Link restaurant to user
             name=request.form.get("name", "").strip(),
             address=request.form.get("address", ""),
             description=request.form.get("description", ""),
@@ -627,10 +686,10 @@ def restaurant_create():
         db.session.add(r)
         db.session.commit()
         log_action(f"Admin created restaurant: {r.name}", module="admin.restaurants", record_id=r.id)
-        flash(f"Restaurant '{r.name}' created.", "success")
+        flash(f"Restaurant '{r.name}' created successfully.", "success")
         return redirect(url_for("admin.restaurants"))
-    return render_template("admin/restaurant_form.html", restaurant=None, title="New Restaurant")
-
+    
+    return render_template("admin/restaurant_form.html", restaurant=None, users=available_users, title="New Restaurant")
 
 @admin_bp.route("/restaurants/<int:id>/edit", methods=["GET", "POST"])
 @login_required
@@ -692,11 +751,16 @@ def events():
 @login_required
 @admin_required
 def event_create():
+    # Get all active users
+    users = User.query.filter(User.status == 'active').all()
+    
     if request.method == "POST":
+        user_id = request.form.get("user_id", type=int)
         image = request.files.get("image")
         image_url = None
         if image and allowed_file(image.filename):
             image_url = save_uploaded_file(image, "events")
+        
         date_str = request.form.get("date", "")
         end_str = request.form.get("end_date", "")
         try:
@@ -705,44 +769,64 @@ def event_create():
         except ValueError:
             date = datetime.utcnow()
             end_date = None
+        
         e = Event(
+            user_id=user_id,  # Link event to user/organizer
             name=request.form.get("name", "").strip(),
             description=request.form.get("description", ""),
-            date=date, end_date=end_date,
+            date=date,
+            end_date=end_date,
             location=request.form.get("location", ""),
+            address=request.form.get("address", ""),
             image_url=image_url,
             ticket_price=float(request.form.get("ticket_price", 0)),
             capacity=int(request.form.get("capacity", 0)),
             organizer=request.form.get("organizer", ""),
             contact=request.form.get("contact", ""),
+            website=request.form.get("website", ""),
             featured=request.form.get("featured") == "on",
-            active=True, status="active",
+            active=True,
+            status="active",
             category=request.form.get("category", ""),
+            latitude=float(request.form.get("latitude", 6.34)) if request.form.get("latitude") else None,
+            longitude=float(request.form.get("longitude", 5.62)) if request.form.get("longitude") else None,
         )
         db.session.add(e)
         db.session.commit()
+        
         log_action(f"Admin created event: {e.name}", module="admin.events", record_id=e.id)
-        flash(f"Event '{e.name}' created.", "success")
+        flash(f"Event '{e.name}' created successfully.", "success")
         return redirect(url_for("admin.events"))
-    return render_template("admin/event_form.html", event=None, title="New Event")
-
+    
+    return render_template("admin/event_form.html", event=None, users=users, title="New Event")
 
 @admin_bp.route("/events/<int:id>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
 def event_edit(id):
     e = Event.query.get_or_404(id)
+    users = User.query.filter(User.status == 'active').all()
+    
     if request.method == "POST":
+        e.user_id = request.form.get("user_id", type=int)  # Add this
         e.name = request.form.get("name", e.name).strip()
         e.description = request.form.get("description", e.description)
         e.location = request.form.get("location", e.location)
+        e.address = request.form.get("address", e.address)
         e.ticket_price = float(request.form.get("ticket_price", e.ticket_price))
         e.capacity = int(request.form.get("capacity", e.capacity))
         e.organizer = request.form.get("organizer", e.organizer)
         e.contact = request.form.get("contact", e.contact)
+        e.website = request.form.get("website", e.website)
         e.featured = request.form.get("featured") == "on"
         e.active = request.form.get("active") == "on"
         e.category = request.form.get("category", e.category)
+        
+        if request.form.get("latitude"):
+            e.latitude = float(request.form.get("latitude"))
+        if request.form.get("longitude"):
+            e.longitude = float(request.form.get("longitude"))
+        
         date_str = request.form.get("date", "")
         end_str = request.form.get("end_date", "")
         try:
@@ -752,17 +836,19 @@ def event_edit(id):
                 e.end_date = datetime.strptime(end_str, "%Y-%m-%dT%H:%M")
         except ValueError:
             pass
+        
         image = request.files.get("image")
         if image and allowed_file(image.filename):
             if e.image_url:
                 delete_uploaded_file(e.image_url, "events")
             e.image_url = save_uploaded_file(image, "events")
+        
         db.session.commit()
         log_action(f"Admin edited event #{id}", module="admin.events", record_id=id)
-        flash("Event updated.", "success")
+        flash("Event updated successfully.", "success")
         return redirect(url_for("admin.events"))
-    return render_template("admin/event_form.html", event=e, title="Edit Event")
-
+    
+    return render_template("admin/event_form.html", event=e, users=users, title="Edit Event")
 
 @admin_bp.route("/events/<int:id>/delete", methods=["POST"])
 @login_required

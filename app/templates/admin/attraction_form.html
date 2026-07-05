@@ -9,6 +9,40 @@
         <form method="POST" enctype="multipart/form-data">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="row g-3">
+            <!-- User Selection (only for new attractions) -->
+            {% if not attraction %}
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Select Owner/Manager *</label>
+              <select name="user_id" class="form-select" required>
+                <option value="">-- Select a user --</option>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.full_name }} ({{ user.email }}) - Role: {{ user.role }}</option>
+                {% endfor %}
+              </select>
+              <div class="form-text small">
+                <i class="bi bi-info-circle me-1"></i>
+                The selected user will be the owner/manager of this attraction.
+              </div>
+            </div>
+            {% else %}
+            <!-- Show current owner when editing -->
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Owner/Manager</label>
+              <select name="user_id" class="form-select">
+                <option value="">-- No owner assigned --</option>
+                {% for user in users %}
+                <option value="{{ user.id }}" {% if attraction and attraction.user_id == user.id %}selected{% endif %}>
+                  {{ user.full_name }} ({{ user.email }}) - Role: {{ user.role }}
+                </option>
+                {% endfor %}
+              </select>
+              <div class="form-text small">
+                <i class="bi bi-info-circle me-1"></i>
+                Assign or change the owner/manager of this attraction.
+              </div>
+            </div>
+            {% endif %}
+
             <div class="col-12">
               <label class="form-label fw-semibold small">Name *</label>
               <input type="text" name="name" class="form-control" value="{{ attraction.name if attraction else '' }}" required>
@@ -69,7 +103,7 @@
               <input type="url" name="website" class="form-control" value="{{ attraction.website if attraction else '' }}" placeholder="https://…">
             </div>
             
-            <!-- Image Upload Section - No URL field! -->
+            <!-- Image Upload Section -->
             <div class="col-12">
               <div class="card bg-light">
                 <div class="card-header">
@@ -80,25 +114,16 @@
                   <div class="mb-3">
                     <label class="form-label fw-semibold small">Current Image</label>
                     <div>
-                      <img src="{{ attraction.image_url }}" 
-                           class="img-thumbnail" 
-                           style="max-height:200px;max-width:100%;object-fit:cover"
-                           alt="{{ attraction.name }}"
-                           onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
+                      <img src="{{ attraction.image_url }}" class="img-thumbnail" style="max-height:200px;max-width:100%;object-fit:cover" alt="{{ attraction.name }}">
                     </div>
-                    <small class="text-muted">Current image will be replaced if you upload a new one.</small>
                   </div>
                   {% endif %}
-                  
                   <div class="mb-2">
                     <label class="form-label fw-semibold small">
                       {% if attraction and attraction.image_url %}Replace Image{% else %}Upload Image{% endif %}
                     </label>
-                    <input type="file" 
-                           name="image" 
-                           class="form-control" 
-                           accept="image/*">
-                    <div class="form-text small">Supported formats: JPG, PNG, GIF, WebP. Max size: 16MB. Images will be automatically optimized.</div>
+                    <input type="file" name="image" class="form-control" accept="image/*">
+                    <div class="form-text small">Supported formats: JPG, PNG, GIF, WebP. Max size: 16MB.</div>
                   </div>
                 </div>
               </div>
@@ -127,6 +152,26 @@
             </a>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar info -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold text-blue mb-3"><i class="bi bi-info-circle me-2"></i>Attraction Information</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-2"><i class="bi bi-building me-2 text-gold"></i>Attractions are linked to user accounts</li>
+          <li class="mb-2"><i class="bi bi-person me-2 text-gold"></i>Owner/Manager can be assigned</li>
+          <li class="mb-2"><i class="bi bi-qr-code me-2 text-gold"></i>QR code is auto-generated on creation</li>
+          <li class="mb-2"><i class="bi bi-check-circle me-2 text-gold"></i>Only active attractions appear on the public site</li>
+        </ul>
+        <hr>
+        <div class="text-muted small">
+          <p class="mb-1"><i class="bi bi-clock me-1"></i>Created: {{ attraction.created_at.strftime('%d %b %Y %H:%M') if attraction and attraction.created_at else '—' }}</p>
+          <p class="mb-0"><i class="bi bi-pencil me-1"></i>Updated: {{ attraction.updated_at.strftime('%d %b %Y %H:%M') if attraction and attraction.updated_at else '—' }}</p>
+        </div>
       </div>
     </div>
   </div>

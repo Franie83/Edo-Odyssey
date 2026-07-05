@@ -1,29 +1,160 @@
 {% extends "admin/base.html" %}
+
 {% block title %}{{ title }} – Admin{% endblock %}
 {% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Manage hotel listings{% endblock %}
+
 {% block content %}
-<div class="col-lg-8">
-  <div class="card border-0 shadow-sm">
-    <div class="card-body p-4">
-      <form method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="row g-3">
-          <div class="col-12"><label class="form-label fw-semibold small">Name *</label><input type="text" name="name" class="form-control" value="{{ hotel.name if hotel else '' }}" required></div>
-          <div class="col-12"><label class="form-label fw-semibold small">Address *</label><input type="text" name="address" class="form-control" value="{{ hotel.address if hotel else '' }}" required></div>
-          <div class="col-12"><label class="form-label fw-semibold small">Description *</label><textarea name="description" class="form-control" rows="4" required>{{ hotel.description if hotel else '' }}</textarea></div>
-          <div class="col-12"><label class="form-label fw-semibold small">Facilities (comma-separated)</label><input type="text" name="facilities" class="form-control" value="{{ hotel.facilities if hotel else '' }}" placeholder="Pool, WiFi, Gym, Restaurant"></div>
-          <div class="col-md-4"><label class="form-label fw-semibold small">Price/Night (₦) *</label><input type="number" name="price_per_night" class="form-control" value="{{ hotel.price_per_night if hotel else 0 }}" min="0" step="0.01" required></div>
-          <div class="col-md-4"><label class="form-label fw-semibold small">Stars</label><select name="stars" class="form-select">{% for s in range(1,6) %}<option value="{{ s }}" {% if hotel and hotel.stars==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
-          <div class="col-md-4"><label class="form-label fw-semibold small">Total Rooms</label><input type="number" name="total_rooms" class="form-control" value="{{ hotel.total_rooms if hotel else 0 }}" min="0"></div>
-          <div class="col-md-6"><label class="form-label fw-semibold small">Latitude *</label><input type="number" name="latitude" step="any" class="form-control" value="{{ hotel.latitude if hotel else 6.34 }}" required></div>
-          <div class="col-md-6"><label class="form-label fw-semibold small">Longitude *</label><input type="number" name="longitude" step="any" class="form-control" value="{{ hotel.longitude if hotel else 5.62 }}" required></div>
-          <div class="col-md-6"><label class="form-label fw-semibold small">Contact</label><input type="text" name="contact" class="form-control" value="{{ hotel.contact if hotel else '' }}"></div>
-          <div class="col-md-6"><label class="form-label fw-semibold small">Website</label><input type="url" name="website" class="form-control" value="{{ hotel.website if hotel else '' }}" placeholder="https://…"></div>
-          <div class="col-12"><label class="form-label fw-semibold small">Image URL (or upload)</label><input type="url" name="image_url" class="form-control mb-1" value="{{ hotel.image_url if hotel else '' }}" placeholder="https://…"><input type="file" name="image" class="form-control" accept="image/*"></div>
-          <div class="col-12"><div class="form-check form-switch"><input type="checkbox" name="featured" class="form-check-input" id="featSw" {% if hotel and hotel.featured %}checked{% endif %}><label class="form-check-label" for="featSw">Featured</label></div></div>
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+          
+          <div class="row g-3">
+            <!-- User Selection (only for new hotels) -->
+            {% if not hotel %}
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Select Hotel Manager *</label>
+              <select name="user_id" class="form-select" required>
+                <option value="">-- Select a user --</option>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.full_name }} ({{ user.email }}) - Current Role: {{ user.role }}</option>
+                {% endfor %}
+              </select>
+              <div class="form-text small">
+                <i class="bi bi-info-circle me-1"></i>
+                Only users without a hotel profile are shown. Their role will be updated to "Hotel" upon creation.
+              </div>
+            </div>
+            {% endif %}
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Hotel Name *</label>
+              <input type="text" name="name" class="form-control" value="{{ hotel.name if hotel else '' }}" required>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Address *</label>
+              <input type="text" name="address" class="form-control" value="{{ hotel.address if hotel else '' }}" required>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Description *</label>
+              <textarea name="description" class="form-control" rows="4" required>{{ hotel.description if hotel else '' }}</textarea>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Facilities (comma-separated)</label>
+              <input type="text" name="facilities" class="form-control" value="{{ hotel.facilities if hotel else '' }}" placeholder="WiFi, Pool, Gym, Parking">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">Price per Night (₦) *</label>
+              <input type="number" name="price_per_night" class="form-control" value="{{ hotel.price_per_night if hotel else 0 }}" min="0" step="0.01" required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">Stars *</label>
+              <select name="stars" class="form-select">
+                <option value="1" {% if hotel and hotel.stars == 1 %}selected{% endif %}>★</option>
+                <option value="2" {% if hotel and hotel.stars == 2 %}selected{% endif %}>★★</option>
+                <option value="3" {% if hotel and hotel.stars == 3 %}selected{% endif %}>★★★</option>
+                <option value="4" {% if hotel and hotel.stars == 4 %}selected{% endif %}>★★★★</option>
+                <option value="5" {% if hotel and hotel.stars == 5 %}selected{% endif %}>★★★★★</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">Total Rooms</label>
+              <input type="number" name="total_rooms" class="form-control" value="{{ hotel.total_rooms if hotel else 0 }}" min="0">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Latitude *</label>
+              <input type="number" name="latitude" step="any" class="form-control" value="{{ hotel.latitude if hotel else 6.34 }}" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Longitude *</label>
+              <input type="number" name="longitude" step="any" class="form-control" value="{{ hotel.longitude if hotel else 5.62 }}" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Contact</label>
+              <input type="text" name="contact" class="form-control" value="{{ hotel.contact if hotel else '' }}" placeholder="Phone number">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Website</label>
+              <input type="url" name="website" class="form-control" value="{{ hotel.website if hotel else '' }}" placeholder="https://…">
+            </div>
+
+            <!-- Image Upload Section -->
+            <div class="col-12">
+              <div class="card bg-light">
+                <div class="card-header">
+                  <h6 class="mb-0"><i class="bi bi-image me-2"></i>Hotel Image</h6>
+                </div>
+                <div class="card-body">
+                  {% if hotel and hotel.image_url %}
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold small">Current Image</label>
+                    <div>
+                      <img src="{{ hotel.image_url }}" class="img-thumbnail" style="max-height:200px;max-width:100%;object-fit:cover" alt="{{ hotel.name }}">
+                    </div>
+                  </div>
+                  {% endif %}
+                  <div class="mb-2">
+                    <label class="form-label fw-semibold small">
+                      {% if hotel and hotel.image_url %}Replace Image{% else %}Upload Image{% endif %}
+                    </label>
+                    <input type="file" name="image" class="form-control" accept="image/*">
+                    <div class="form-text small">Supported formats: JPG, PNG, GIF, WebP. Max size: 16MB.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-check form-switch">
+                <input type="checkbox" name="featured" class="form-check-input" id="featuredSwitch" {% if hotel and hotel.featured %}checked{% endif %}>
+                <label class="form-check-label" for="featuredSwitch">Featured</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-gold px-4">
+              <i class="bi bi-save me-1"></i>Save Hotel
+            </button>
+            <a href="{{ url_for('admin.hotels') }}" class="btn btn-outline-secondary">
+              <i class="bi bi-x-circle me-1"></i>Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar info -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold text-blue mb-3"><i class="bi bi-info-circle me-2"></i>Hotel Information</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-2"><i class="bi bi-building me-2 text-gold"></i>Hotels are linked to user accounts</li>
+          <li class="mb-2"><i class="bi bi-person me-2 text-gold"></i>User role will be updated to "Hotel"</li>
+          <li class="mb-2"><i class="bi bi-star me-2 text-gold"></i>Star rating helps users choose</li>
+          <li class="mb-2"><i class="bi bi-check-circle me-2 text-gold"></i>Only active hotels appear on the public site</li>
+        </ul>
+        <hr>
+        <div class="text-muted small">
+          <p class="mb-1"><i class="bi bi-clock me-1"></i>Created: {{ hotel.created_at.strftime('%d %b %Y %H:%M') if hotel and hotel.created_at else '—' }}</p>
+          <p class="mb-0"><i class="bi bi-pencil me-1"></i>Updated: {{ hotel.updated_at.strftime('%d %b %Y %H:%M') if hotel and hotel.updated_at else '—' }}</p>
         </div>
-        <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-gold px-4">Save Hotel</button><a href="{{ url_for('admin.hotels') }}" class="btn btn-outline-secondary">Cancel</a></div>
-      </form>
+      </div>
     </div>
   </div>
 </div>

@@ -56,7 +56,6 @@ def register():
         confirm = request.form.get("confirm_password", "")
         first_name = request.form.get("first_name", "").strip()
         last_name = request.form.get("last_name", "").strip()
-        role = request.form.get("role", "Tourist")
         phone = request.form.get("phone", "").strip()
 
         if password != confirm:
@@ -71,31 +70,24 @@ def register():
             flash("Email already registered. Please log in.", "danger")
             return redirect(url_for("auth.login"))
 
-        # Only allow public roles - Restaurant is now included
-        allowed_roles = ["Tourist", "Guide", "Hotel", "Restaurant"]
-        if role not in allowed_roles:
-            role = "Tourist"
-
+        # 🔒 FIX: Force all new registrations to be "Tourist"
+        # Only admins can promote users to Guide, Hotel, Restaurant, or Admin roles
         user = User(
             email=email,
             first_name=first_name,
             last_name=last_name,
-            role=role,
+            role="Tourist",  # Always Tourist on registration
             phone=phone,
-            is_verified=True,  # Auto-verify for MVP
+            is_verified=False,  # Needs admin verification
             status="active",
         )
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
 
-        log_action(f"New user registered: {email} as {role}", module="auth")
+        log_action(f"New user registered: {email} as Tourist", module="auth")
         flash(f"Account created successfully! Welcome to Edo Odyssey, {first_name}!", "success")
         login_user(user)
-        
-        # Redirect based on role
-        if user.is_admin:
-            return redirect(url_for("admin.dashboard"))
         return redirect(url_for("dashboard.index"))
 
     return render_template("auth/register.html")

@@ -55,6 +55,12 @@ class User(UserMixin, BaseModel):
     favourites = db.relationship("Favourite", back_populates="user", lazy="dynamic")
     payments = db.relationship("Payment", back_populates="user", lazy="dynamic")
     audit_logs = db.relationship("AuditLog", foreign_keys="AuditLog.user_id", back_populates="user", lazy="dynamic")
+    
+    # New relationships for owned entities
+    owned_attractions = db.relationship("Attraction", back_populates="owner", foreign_keys="Attraction.user_id", lazy="dynamic")
+    owned_hotels = db.relationship("Hotel", back_populates="owner", foreign_keys="Hotel.user_id", lazy="dynamic")
+    owned_restaurants = db.relationship("Restaurant", back_populates="owner", foreign_keys="Restaurant.user_id", lazy="dynamic")
+    owned_events = db.relationship("Event", back_populates="owner", foreign_keys="Event.user_id", lazy="dynamic")  # Add this
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -93,6 +99,7 @@ class Category(BaseModel):
 class Attraction(BaseModel):
     __tablename__ = "attractions"
 
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)  # Owner/Manager
     name = db.Column(db.String(150), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=True)
     description = db.Column(db.Text, nullable=False)
@@ -115,6 +122,7 @@ class Attraction(BaseModel):
     qr_codes = db.relationship("QRCode", back_populates="attraction", cascade="all, delete-orphan")
     reviews = db.relationship("Review", primaryjoin="and_(Review.target_type=='Attraction', Review.target_id==Attraction.id)", foreign_keys="Review.target_id", lazy="dynamic", overlaps="reviews")
     favourites = db.relationship("Favourite", primaryjoin="and_(Favourite.target_type=='Attraction', Favourite.target_id==Attraction.id)", foreign_keys="Favourite.target_id", lazy="dynamic", overlaps="favourites")
+    owner = db.relationship("User", back_populates="owned_attractions", foreign_keys=[user_id])
 
     @property
     def avg_rating(self):
@@ -178,6 +186,7 @@ class GuideAvailability(db.Model):
 class Hotel(BaseModel):
     __tablename__ = "hotels"
 
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)  # Hotel Manager
     name = db.Column(db.String(150), nullable=False)
     address = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -196,6 +205,7 @@ class Hotel(BaseModel):
     featured = db.Column(db.Boolean, default=False, nullable=False)
 
     rooms = db.relationship("HotelRoom", back_populates="hotel", cascade="all, delete-orphan")
+    owner = db.relationship("User", back_populates="owned_hotels", foreign_keys=[user_id])
 
     @property
     def avg_rating(self):
@@ -226,6 +236,7 @@ class HotelRoom(db.Model):
 class Restaurant(BaseModel):
     __tablename__ = "restaurants"
 
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)  # Restaurant Owner
     name = db.Column(db.String(150), nullable=False)
     address = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -242,6 +253,7 @@ class Restaurant(BaseModel):
     reservation_available = db.Column(db.Boolean, default=True, nullable=False)
 
     menus = db.relationship("RestaurantMenu", back_populates="restaurant", cascade="all, delete-orphan")
+    owner = db.relationship("User", back_populates="owned_restaurants", foreign_keys=[user_id])
 
     @property
     def avg_rating(self):
@@ -267,6 +279,7 @@ class RestaurantMenu(db.Model):
 class Event(BaseModel):
     __tablename__ = "events"
 
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)  # Event Organizer
     name = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, nullable=False)
@@ -285,6 +298,9 @@ class Event(BaseModel):
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
     category = db.Column(db.String(100), nullable=True)
+
+    # Relationship
+    owner = db.relationship("User", back_populates="owned_events", foreign_keys=[user_id])
 
     @property
     def is_upcoming(self):

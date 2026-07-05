@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Booking Details – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero py-4">
+  <div class="container">
+    <h1 class="mb-0" style="font-size:1.6rem">Booking Details</h1>
+    <p class="text-white-50 mb-0 small">Reference: {{ booking.reference_code }}</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Booking Type:</strong> {{ booking.booking_type }}</p>
+              <p><strong>Target:</strong> {{ booking.target_name }}</p>
+              <p><strong>Start Date:</strong> {{ booking.start_date.strftime('%d %b %Y') }}</p>
+              {% if booking.end_date %}
+              <p><strong>End Date:</strong> {{ booking.end_date.strftime('%d %b %Y') }}</p>
+              {% endif %}
+              <p><strong>Guests:</strong> {{ booking.num_guests }}</p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Total Price:</strong> <span class="fw-bold text-gold">₦{{ '{:,.0f}'.format(booking.total_price) }}</span></p>
+              <p><strong>Status:</strong> 
+                {% if booking.booking_status == 'Approved' %}
+                  <span class="badge bg-info text-white">Approved</span>
+                {% elif booking.booking_status == 'Confirmed' %}
+                  <span class="badge bg-success">Confirmed</span>
+                {% elif booking.booking_status == 'Completed' %}
+                  <span class="badge bg-secondary">Completed</span>
+                {% elif booking.booking_status == 'Pending' %}
+                  <span class="badge bg-warning text-dark">Pending</span>
+                {% elif booking.booking_status == 'Rejected' %}
+                  <span class="badge bg-danger">Rejected</span>
+                {% elif booking.booking_status == 'Cancelled' %}
+                  <span class="badge bg-danger">Cancelled</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ booking.booking_status }}</span>
+                {% endif %}
+              </p>
+              {% if booking.admin_comment %}
+              <p><strong>Admin Comment:</strong> {{ booking.admin_comment }}</p>
+              {% endif %}
+              {% if booking.target_comment %}
+              <p><strong>Target Comment:</strong> {{ booking.target_comment }}</p>
+              {% endif %}
+              {% if booking.notes %}
+              <p><strong>Notes:</strong> {{ booking.notes }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6>Booking Timeline</h6>
+          <ul class="list-unstyled small">
+            <li class="mb-2">
+              <i class="bi bi-calendar-plus text-gold me-2"></i>
+              Created: {{ booking.created_at.strftime('%d %b %Y %H:%M') }}
+            </li>
+            {% if booking.approved_at %}
+            <li class="mb-2">
+              <i class="bi bi-check-circle text-success me-2"></i>
+              Approved: {{ booking.approved_at.strftime('%d %b %Y %H:%M') }}
+            </li>
+            {% endif %}
+            {% if booking.confirmed_at %}
+            <li class="mb-2">
+              <i class="bi bi-calendar-check text-primary me-2"></i>
+              Confirmed: {{ booking.confirmed_at.strftime('%d %b %Y %H:%M') }}
+            </li>
+            {% endif %}
+            {% if booking.completed_at %}
+            <li class="mb-2">
+              <i class="bi bi-check2-circle text-gold me-2"></i>
+              Completed: {{ booking.completed_at.strftime('%d %b %Y %H:%M') }}
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

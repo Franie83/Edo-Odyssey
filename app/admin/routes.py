@@ -15,7 +15,7 @@ from ..models.models import (User, Attraction, Guide, Hotel, Restaurant,
                               Partner, Advertisement, Payment, HotelRoom,
                               RestaurantMenu, NewsComment)
 from ..utils.decorators import admin_required
-from ..utils.helpers import log_action, save_uploaded_file, delete_uploaded_file, allowed_file
+from ..utils.helpers import log_action, save_uploaded_file, delete_uploaded_file, allowed_file, create_notification, award_heritage_points 
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -970,14 +970,109 @@ def bookings():
 def booking_status(id):
     b = Booking.query.get_or_404(id)
     new_status = request.form.get("status", "")
-    allowed = ["Pending", "Confirmed", "Completed", "Cancelled"]
-    if new_status in allowed:
+    comment = request.form.get("admin_comment", "").strip()
+    
+    allowed = ["Pending", "Approved", "Confirmed", "Completed", "Rejected"]
+    if new_status not in allowed:
+        flash("Invalid booking status.", "danger")
+        return redirect(url_for("admin.bookings"))
+    
+    try:
         b.booking_status = new_status
+        
+        # Update timestamps based on status
+        if new_status == "Approved":
+            b.approved_at = datetime.utcnow()
+            b.admin_comment = comment
+            
+            # Create notification for the target (Guide/Hotel/etc.)
+            target_user = get_booking_target(b)
+            if target_user:
+                create_notification(
+                    target_user.id,
+                    "📋 New Booking Approved!",
+                    f"Booking {b.reference_code} for {b.target_name} has been approved by admin. Please review and confirm.",
+                    "info",
+                    link=f"/dashboard/bookings/{b.id}"
+                )
+            
+            # Notify the user who made the booking
+            create_notification(
+                b.user_id,
+                "✅ Booking Approved!",
+                f"Your booking {b.reference_code} for {b.target_name} has been approved by admin.",
+                "success",
+                link=f"/dashboard/bookings/{b.id}"
+            )
+            
+        elif new_status == "Confirmed":
+            b.confirmed_at = datetime.utcnow()
+            b.target_comment = comment
+            
+            # Notify the user
+            create_notification(
+                b.user_id,
+                "✅ Booking Confirmed!",
+                f"Your booking {b.reference_code} for {b.target_name} has been confirmed by {b.target_name}.",
+                "success",
+                link=f"/dashboard/bookings/{b.id}"
+            )
+            
+        elif new_status == "Completed":
+            b.completed_at = datetime.utcnow()
+            
+            # Award heritage points to user
+            award_heritage_points(b.user, 'tour_completed')
+            
+            create_notification(
+                b.user_id,
+                "🎉 Booking Completed!",
+                f"Your booking {b.reference_code} for {b.target_name} has been completed. You earned 30 Heritage Points!",
+                "success",
+                link=f"/dashboard/bookings/{b.id}"
+            )
+            
+        elif new_status == "Rejected":
+            b.target_comment = comment
+            
+            create_notification(
+                b.user_id,
+                "❌ Booking Rejected",
+                f"Your booking {b.reference_code} for {b.target_name} has been rejected. Reason: {comment or 'No reason provided'}",
+                "danger",
+                link=f"/dashboard/bookings/{b.id}"
+            )
+        
         db.session.commit()
         log_action(f"Admin changed booking #{id} status to {new_status}", module="admin.bookings", record_id=id)
         flash(f"Booking status updated to {new_status}.", "success")
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating booking: {str(e)}", "danger")
+    
     return redirect(url_for("admin.bookings"))
 
+
+def get_booking_target(booking):
+    """Get the target user for a booking (Guide/Hotel/Restaurant/Attraction owner)"""
+    if booking.booking_type == "Guide":
+        guide = Guide.query.get(booking.target_id)
+        if guide:
+            return guide.user
+    elif booking.booking_type == "Hotel":
+        hotel = Hotel.query.get(booking.target_id)
+        if hotel:
+            return hotel.owner
+    elif booking.booking_type == "Tour":
+        attraction = Attraction.query.get(booking.target_id)
+        if attraction:
+            return attraction.owner
+    elif booking.booking_type == "Event":
+        event = Event.query.get(booking.target_id)
+        if event:
+            return event.owner
+    return None
 
 # ─── REVIEWS ─────────────────────────────────────────────────────────────────
 

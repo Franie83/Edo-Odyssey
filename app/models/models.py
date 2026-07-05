@@ -356,15 +356,21 @@ class Booking(BaseModel):
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=True)
     total_price = db.Column(db.Float, nullable=False)
-    booking_status = db.Column(db.String(50), default="Pending", nullable=False)  # Pending, Approved, Completed, Cancelled
+    booking_status = db.Column(db.String(50), default="Pending", nullable=False)
     cancellation_reason = db.Column(db.String(255), nullable=True)
     notes = db.Column(db.Text, nullable=True)
     reference_code = db.Column(db.String(20), nullable=True, unique=True)
     num_guests = db.Column(db.Integer, default=1, nullable=False)
+    
+    # NEW FIELDS FOR APPROVAL WORKFLOW
+    admin_comment = db.Column(db.Text, nullable=True)  # Admin's comment when approving
+    target_comment = db.Column(db.Text, nullable=True)  # Target's comment when confirming/rejecting
+    approved_at = db.Column(db.DateTime, nullable=True)  # When admin approved
+    confirmed_at = db.Column(db.DateTime, nullable=True)  # When target confirmed
+    completed_at = db.Column(db.DateTime, nullable=True)  # When completed
 
     user = db.relationship("User", back_populates="bookings")
     payment = db.relationship("Payment", back_populates="booking", uselist=False)
-
 
 class Review(BaseModel):
     __tablename__ = "reviews"

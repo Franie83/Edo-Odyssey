@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edo Odyssey – Cradle of Black Civilization</title>
+  <meta name="description" content="Explore Edo State's world-class cultural heritage, wildlife, and tourism experiences through the official Edo Odyssey digital platform.">
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/main.css">
+  
+</head>
+<body>
+
+<!-- TOP BANNER -->
+<div class="top-banner py-1 d-none d-md-block">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div class="d-flex gap-3 small">
+      <span><i class="bi bi-telephone-fill me-1"></i>+234 (0) 52 255 000</span>
+      <span><i class="bi bi-envelope-fill me-1"></i>info@edsta.edo.gov.ng</span>
+    </div>
+    <div class="d-flex gap-2 small">
+      <a href="#" class="text-gold"><i class="bi bi-facebook"></i></a>
+      <a href="#" class="text-gold"><i class="bi bi-twitter-x"></i></a>
+      <a href="#" class="text-gold"><i class="bi bi-instagram"></i></a>
+      <a href="#" class="text-gold"><i class="bi bi-youtube"></i></a>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark main-navbar sticky-top">
+  <div class="container">
+    <!-- Brand -->
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+      <div class="brand-icon"><i class="bi bi-compass-fill"></i></div>
+      <div>
+        <div class="brand-title">EDO ODYSSEY</div>
+        <div class="brand-subtitle">Official Tourism Platform</div>
+      </div>
+    </a>
+
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav mx-auto gap-1">
+        <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Explore</a>
+          <ul class="dropdown-menu mega-dropdown">
+            <li><a class="dropdown-item" href="/attractions/"><i class="bi bi-building me-2 text-primary"></i>Attractions</a></li>
+            <li><a class="dropdown-item" href="/guides/"><i class="bi bi-person-badge me-2 text-primary"></i>Tour Guides</a></li>
+            <li><a class="dropdown-item" href="/hotels/"><i class="bi bi-building-fill me-2 text-primary"></i>Hotels</a></li>
+            <li><a class="dropdown-item" href="/restaurants/"><i class="bi bi-cup-hot me-2 text-primary"></i>Restaurants</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link " href="/events/">Events</a></li>
+        <li class="nav-item"><a class="nav-link " href="/news/">News</a></li>
+        <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+      </ul>
+
+      <!-- Search -->
+      <form class="d-flex me-3 search-form" action="/search/" method="get">
+        <div class="input-group input-group-sm">
+          <input class="form-control nav-search" type="search" name="q" placeholder="Search Edo…" value="">
+          <button class="btn btn-gold btn-sm" type="submit"><i class="bi bi-search"></i></button>
+        </div>
+      </form>
+
+      <!-- User menu -->
+      
+      <div class="dropdown">
+        <button class="btn btn-outline-gold dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+          
+          <div class="avatar-initials-sm">FE</div>
+          
+          <span class="d-none d-lg-inline">Frank</span>
+          
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li class="dropdown-header">Frank Egbeobawaye<br><small class="text-muted">Super Admin</small></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="/dashboard/"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+          <li><a class="dropdown-item" href="/dashboard/profile"><i class="bi bi-person me-2"></i>Profile</a></li>
+          
+          <li><a class="dropdown-item text-primary fw-semibold" href="/admin/"><i class="bi bi-shield-check me-2"></i>Admin Panel</a></li>
+          
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+        </ul>
+      </div>
+      
+    </div>
+  </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+
+
+
+
+<!-- PAGE CONTENT -->
+
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<section class="hero-section">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1580654712603-eb43273aff33?auto=format&amp;fit=crop&amp;q=80&amp;w=1600')"></div>
+  <div class="hero-overlay"></div>
+  <div class="container hero-content py-5">
+    <div class="row align-items-center min-vh-75">
+      <div class="col-lg-7">
+        <div class="hero-badge"><i class="bi bi-award-fill me-1"></i>Official Edo State Tourism Agency</div>
+        <h1 class="hero-title mb-3">
+          <span class="accent">Edo State</span> – Cradle of Black Civilization
+        </h1>
+        <p class="hero-sub mb-4">Welcome to the official digital gateway of the Edo State Tourism Agency (EDSTA). Explore ancient royal palaces, watch world-famous bronze casters at work, track wildlife in tropical rainforests, and book certified local tour guides—all in one place.</p>
+        <div class="d-flex flex-wrap gap-3 mb-5">
+          <a href="/attractions/" class="btn btn-gold btn-lg px-4">
+            <i class="bi bi-compass me-2"></i>Explore Now
+          </a>
+          <a href="/auth/register" class="btn btn-outline-light btn-lg px-4">
+            <i class="bi bi-person-plus me-2"></i>Join EDSTA
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="text-center">
+            <div class="hero-stat-num">{{ total_attractions }}+</div>
+            <div class="hero-stat-label">Attractions</div>
+          </div>
+          <div class="text-center">
+            <div class="hero-stat-num">{{ total_guides }}+</div>
+            <div class="hero-stat-label">Guides</div>
+          </div>
+          <div class="text-center">
+            <div class="hero-stat-num">{{ total_hotels }}+</div>
+            <div class="hero-stat-label">Hotels</div>
+          </div>
+          <div class="text-center">
+            <div class="hero-stat-num">600+</div>
+            <div class="hero-stat-label">Years History</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-flex justify-content-end">
+        <div class="quick-login-banner">
+          <p class="text-gold fw-bold mb-2 small text-uppercase letter-spacing"><i class="bi bi-lightning-fill me-1"></i>Quick Demo Login</p>
+          <div class="d-flex flex-column gap-2">
+            <a href="/auth/quick-login/superadmin" class="btn btn-sm btn-gold w-100 text-start"><i class="bi bi-shield-star me-2"></i>Super Admin — Full Access</a>
+            <a href="/auth/quick-login/admin" class="btn btn-sm btn-outline-gold w-100 text-start"><i class="bi bi-shield-check me-2"></i>Agency Admin</a>
+            <a href="/auth/quick-login/tourist" class="btn btn-sm btn-outline-light w-100 text-start"><i class="bi bi-person me-2"></i>Tourist — Akenzua Musa</a>
+            <a href="/auth/quick-login/guide" class="btn btn-sm btn-outline-light w-100 text-start"><i class="bi bi-person-badge me-2"></i>Guide — Osaro Edokpayi</a>
+            <a href="/auth/quick-login/hotel" class="btn btn-sm btn-outline-light w-100 text-start"><i class="bi bi-building me-2"></i>Hotel Manager</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CATEGORIES ─────────────────────────────────────────── -->
+<section class="py-5 bg-blue-100">
+  <div class="container">
+    <div class="row justify-content-center mb-4">
+      <div class="col-lg-6 text-center">
+        <div class="section-badge"><i class="bi bi-grid me-1"></i>Explore by Category</div>
+        <h2 class="section-title">Discover Edo's Wonders</h2>
+        <div class="section-divider"></div>
+      </div>
+    </div>
+    <div class="row g-3 justify-content-center">
+      {% for cat in categories %}
+      <div class="col-6 col-md-3 col-lg-2">
+        <a href="{{ url_for('attractions.list_attractions') }}?category={{ cat.id }}" class="text-decoration-none">
+          <div class="text-center p-3 bg-white rounded-3 shadow-sm h-100 hover-lift">
+            <div class="mb-2" style="font-size:2rem; color:{{ cat.color or '#1a3a6b' }}"><i class="bi {{ cat.icon or 'bi-building-fill' }}"></i></div>
+            <div class="fw-semibold small text-dark">{{ cat.name }}</div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+      <div class="col-6 col-md-3 col-lg-2">
+        <a href="/guides/" class="text-decoration-none">
+          <div class="text-center p-3 bg-white rounded-3 shadow-sm h-100 hover-lift">
+            <div class="mb-2" style="font-size:2rem; color:#c9a227"><i class="bi bi-person-badge"></i></div>
+            <div class="fw-semibold small text-dark">Tour Guides</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <a href="/hotels/" class="text-decoration-none">
+          <div class="text-center p-3 bg-white rounded-3 shadow-sm h-100 hover-lift">
+            <div class="mb-2" style="font-size:2rem; color:#1a3a6b"><i class="bi bi-building-fill"></i></div>
+            <div class="fw-semibold small text-dark">Hotels</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <a href="/restaurants/" class="text-decoration-none">
+          <div class="text-center p-3 bg-white rounded-3 shadow-sm h-100 hover-lift">
+            <div class="mb-2" style="font-size:2rem; color:#e05c27"><i class="bi bi-cup-hot-fill"></i></div>
+            <div class="fw-semibold small text-dark">Restaurants</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURED ATTRACTIONS ───────────────────────────────── -->
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <div class="section-badge"><i class="bi bi-star-fill me-1"></i>Featured</div>
+        <h2 class="section-title mb-0">Top Attractions</h2>
+        <div class="section-divider left"></div>
+      </div>
+      <a href="{{ url_for('attractions.list_attractions') }}" class="btn btn-outline-blue btn-sm">View All <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for attraction in featured_attractions %}
+      <div class="col-md-6 col-lg-4">
+        <div class="attraction-card card">
+          <div class="card-img-wrap">
+            <img src="{{ attraction.image_url | image_src }}" alt="{{ attraction.name }}" loading="lazy">
+            <div class="card-category-badge">{{ attraction.category.name if attraction.category else 'Attraction' }}</div>
+            <div class="card-price-badge">{% if attraction.ticket_price == 0 %}Free{% else %}₦{{ attraction.ticket_price }}{% endif %}</div>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title fw-bold text-blue mb-1" style="font-size:.95rem">{{ attraction.name }}</h5>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <div class="star-rating">
+                {% for i in range(5) %}
+                  {% if i < attraction.avg_rating|int %}
+                    <i class="bi bi-star-fill"></i>
+                  {% else %}
+                    <i class="bi bi-star"></i>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              <small class="text-muted">({{ attraction.avg_rating }})</small>
+            </div>
+            <p class="card-text text-muted text-truncate-2 small mb-3">{{ attraction.description|truncate(100) }}</p>
+            <div class="d-flex align-items-center justify-content-between">
+              <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ attraction.address|truncate(30) }}</small>
+              <a href="{{ url_for('attractions.detail', id=attraction.id) }}" class="btn btn-blue btn-sm">Explore</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12 text-center py-5">
+        <div class="text-muted">
+          <i class="bi bi-building fs-1 d-block mb-3"></i>
+          <p class="mb-2">No featured attractions yet.</p>
+          <p class="small">Mark attractions as "Featured" in the admin panel to display them here.</p>
+          {% if current_user.is_admin %}
+          <a href="{{ url_for('admin.attractions') }}" class="btn btn-gold btn-sm">Go to Admin</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURED GUIDES ─────────────────────────────────────── -->
+<section class="py-5 bg-blue-100">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <div class="section-badge"><i class="bi bi-person-badge me-1"></i>Certified</div>
+        <h2 class="section-title mb-0">Expert Tour Guides</h2>
+        <div class="section-divider left"></div>
+      </div>
+      <a href="{{ url_for('guides.list_guides') }}" class="btn btn-outline-blue btn-sm">All Guides <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for guide in featured_guides %}
+      <div class="col-md-6 col-lg-3">
+        <div class="guide-card card p-3 text-center h-100">
+          <div class="mb-3">
+            {% if guide.user and guide.user.avatar_url %}
+            <img src="{{ guide.user.avatar_url }}" class="rounded-circle" width="80" height="80" alt="{{ guide.user.full_name }}">
+            {% else %}
+            <div class="guide-avatar-placeholder mx-auto"><i class="bi bi-person-fill"></i></div>
+            {% endif %}
+          </div>
+          <h6 class="fw-bold text-blue">{{ guide.user.full_name if guide.user else 'Tour Guide' }}</h6>
+          <div class="star-rating mb-1">
+            {% for i in range(5) %}
+              {% if i < guide.avg_rating|int %}
+                <i class="bi bi-star-fill"></i>
+              {% else %}
+                <i class="bi bi-star"></i>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <p class="text-muted small mb-2">{{ guide.experience or 0 }} yrs experience</p>
+          <div class="d-flex flex-wrap justify-content-center gap-1 mb-3">
+            {% if guide.languages %}
+              {% for lang in guide.languages.split(',') %}
+              <span class="lang-badge">{{ lang.strip() }}</span>
+              {% endfor %}
+            {% else %}
+              <span class="text-muted small">No languages set</span>
+            {% endif %}
+          </div>
+          <div class="d-flex justify-content-between align-items-center mt-auto">
+            <div class="text-gold fw-bold">₦{{ guide.hourly_rate or 0 }}/hr</div>
+            <a href="{{ url_for('bookings.new_booking', booking_type='Guide', target_id=guide.id) }}" class="btn btn-blue btn-sm">Book</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── UPCOMING EVENTS ─────────────────────────────────────── -->
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <div class="section-badge"><i class="bi bi-calendar-event me-1"></i>Coming Up</div>
+        <h2 class="section-title mb-0">Upcoming Events</h2>
+        <div class="section-divider left"></div>
+      </div>
+      <a href="{{ url_for('events.list_events') }}" class="btn btn-outline-blue btn-sm">All Events <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for event in upcoming_events %}
+      <div class="col-md-6 col-lg-4">
+        <div class="event-card card">
+          <div class="card-img-wrap" style="height:200px">
+            <img src="{{ event.image_url | image_src }}" alt="{{ event.name }}" loading="lazy">
+            <div class="card-category-badge">{{ event.category or 'Event' }}</div>
+            <div class="card-price-badge">{% if event.ticket_price == 0 %}Free{% else %}₦{{ event.ticket_price }}{% endif %}</div>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title fw-bold text-blue" style="font-size:.9rem">{{ event.name }}</h5>
+            <p class="text-muted small mb-2"><i class="bi bi-calendar me-1"></i>{{ event.date.strftime('%d %b %Y') if event.date else 'TBD' }} • <i class="bi bi-geo-alt ms-1 me-1"></i>{{ event.location or 'TBD' }}</p>
+            <div class="d-flex gap-2 mb-2" id="cd-{{ event.id }}" data-countdown="{{ event.date.isoformat() if event.date else '' }}">
+              <div class="countdown-box text-center"><div class="countdown-num">--</div></div>
+              <div class="countdown-sep text-gold fw-bold">:</div>
+              <div class="countdown-box text-center"><div class="countdown-num">--</div></div>
+              <div class="countdown-sep text-gold fw-bold">:</div>
+              <div class="countdown-box text-center"><div class="countdown-num">--</div></div>
+              <div class="countdown-sep text-gold fw-bold">:</div>
+              <div class="countdown-box text-center"><div class="countdown-num">--</div></div>
+            </div>
+            <a href="{{ url_for('events.detail', id=event.id) }}" class="btn btn-blue btn-sm w-100">View Event</a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12 text-center py-5">
+        <div class="text-muted">
+          <i class="bi bi-calendar-event fs-1 d-block mb-3"></i>
+          <p class="mb-2">No upcoming events.</p>
+          <p class="small">Check back later for exciting events in Edo State.</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── HOTELS ─────────────────────────────────────────────── -->
+<section class="py-5" style="background:linear-gradient(135deg,var(--blue-900) 0%,var(--blue-800) 100%)">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <div class="section-badge" style="background:rgba(201,162,39,.15);color:var(--gold-400)"><i class="bi bi-building me-1"></i>Accommodations</div>
+        <h2 class="section-title mb-0 text-white">Where to Stay</h2>
+        <div class="section-divider left"></div>
+      </div>
+      <a href="{{ url_for('hotels.list_hotels') }}" class="btn btn-outline-gold btn-sm">All Hotels</a>
+    </div>
+    <div class="row g-4">
+      {% for hotel in featured_hotels %}
+      <div class="col-md-4">
+        <div class="hotel-card card">
+          <div class="card-img-wrap" style="height:200px">
+            <img src="{{ hotel.image_url | image_src }}" alt="{{ hotel.name }}" loading="lazy">
+            <div class="card-price-badge">₦{{ hotel.price_per_night }}/night</div>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title fw-bold text-blue" style="font-size:.9rem">{{ hotel.name }}</h5>
+            <div class="text-gold mb-1">
+              {% for i in range(hotel.stars or 3) %}
+                <i class="bi bi-star-fill" style="font-size:.75rem"></i>
+              {% endfor %}
+            </div>
+            <p class="text-muted small mb-2 text-truncate-2">{{ hotel.description|truncate(80) }}</p>
+            <div class="d-flex justify-content-between">
+              <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ hotel.address|truncate(20) }}</small>
+              <a href="{{ url_for('hotels.detail', id=hotel.id) }}" class="btn btn-blue btn-sm">View</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12 text-center py-5">
+        <div class="text-white-50">
+          <i class="bi bi-building fs-1 d-block mb-3"></i>
+          <p class="mb-2">No featured hotels yet.</p>
+          <p class="small">Mark hotels as "Featured" in the admin panel to display them here.</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── NEWS ───────────────────────────────────────────────── -->
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <div class="section-badge"><i class="bi bi-newspaper me-1"></i>Latest</div>
+        <h2 class="section-title mb-0">Tourism News</h2>
+        <div class="section-divider left"></div>
+      </div>
+      <a href="{{ url_for('news.list_news') }}" class="btn btn-outline-blue btn-sm">All News</a>
+    </div>
+    <div class="row g-4">
+      {% if recent_news %}
+      <div class="col-lg-6">
+        {% with article = recent_news[0] %}
+        <div class="news-card card h-100">
+          <div class="card-img-wrap" style="height:280px">
+            <img src="{{ article.image_url | image_src }}" alt="{{ article.title }}" loading="lazy">
+            {% if article.featured %}
+            <div class="card-category-badge"><i class="bi bi-star-fill me-1"></i>Featured</div>
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <span class="badge bg-blue-100 text-blue mb-2">{{ article.category or 'News' }}</span>
+            <h4 class="card-title fw-bold text-blue">{{ article.title }}</h4>
+            <p class="text-muted">{{ article.content|striptags|truncate(150) }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">By {{ article.author or 'EDSTA Communications' }} · {{ article.created_at.strftime('%d %b %Y') if article.created_at else 'TBD' }}</small>
+              <a href="{{ url_for('news.detail', id=article.id) }}" class="btn btn-blue btn-sm">Read More</a>
+            </div>
+          </div>
+        </div>
+        {% endwith %}
+      </div>
+      <div class="col-lg-6">
+        <div class="d-flex flex-column gap-3 h-100">
+          {% for article in recent_news[1:4] %}
+          <div class="news-card card">
+            <div class="row g-0">
+              <div class="col-4">
+                <img src="{{ article.image_url | image_src }}" class="w-100 h-100 object-fit-cover rounded-start" alt="{{ article.title }}" style="min-height:100px">
+              </div>
+              <div class="col-8">
+                <div class="card-body py-2">
+                  <span class="badge bg-blue-100 text-blue" style="font-size:.65rem">{{ article.category or 'News' }}</span>
+                  <h6 class="card-title fw-bold text-blue mt-1 text-truncate-2" style="font-size:.85rem">{{ article.title }}</h6>
+                  <small class="text-muted">{{ article.created_at.strftime('%d %b %Y') if article.created_at else 'TBD' }}</small><br>
+                  <a href="{{ url_for('news.detail', id=article.id) }}" class="btn btn-blue btn-sm mt-1 py-0">Read</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12 text-center py-5">
+        <div class="text-muted">
+          <i class="bi bi-newspaper fs-1 d-block mb-3"></i>
+          <p class="mb-2">No news articles yet.</p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- ── PARTNERS ────────────────────────────────────────────── -->
+<section class="py-4 bg-gray-50">
+  <div class="container text-center">
+    <p class="text-muted small text-uppercase letter-spacing mb-3 fw-semibold">Our Partners &amp; Sponsors</p>
+    <div class="d-flex flex-wrap justify-content-center gap-4 align-items-center">
+      {% for partner in partners %}
+      <div class="opacity-75">
+        {% if partner.logo_url %}
+        <img src="{{ partner.logo_url }}" alt="{{ partner.name }}" height="40" style="max-width:120px;object-fit:contain">
+        {% else %}
+        <span class="text-muted fw-bold">{{ partner.name }}</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────── -->
+<section class="py-5" style="background:linear-gradient(135deg,var(--gold-600),var(--gold-500))">
+  <div class="container text-center">
+    <h2 class="fw-bold text-white mb-2" style="font-family:'Playfair Display',serif;font-size:2rem">Ready to Explore Edo State?</h2>
+    <p class="text-white mb-4 opacity-90">Join thousands of travellers discovering the Cradle of Black Civilization.</p>
+    <div class="d-flex gap-3 justify-content-center">
+      <a href="/auth/register" class="btn btn-dark btn-lg px-4 fw-semibold">Create Free Account</a>
+      <a href="/attractions/" class="btn btn-outline-dark btn-lg px-4">Browse Attractions</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer mt-5">
+  <div class="footer-top py-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="brand-icon"><i class="bi bi-compass-fill"></i></div>
+            <div>
+              <div class="brand-title text-white">EDO ODYSSEY</div>
+              <div class="brand-subtitle" style="font-size:0.65rem">Official Tourism Platform</div>
+            </div>
+          </div>
+          <p class="text-white-50 small">The Edo State Tourism Agency (EDSTA) is a statutory public corporation established to guide, preserve, license, and promote the natural landmarks, cultural festivals, and historical heritage monuments …</p>
+          <div class="d-flex gap-3 mt-3">
+            <a href="#" class="text-gold fs-5"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="text-gold fs-5"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" class="text-gold fs-5"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="text-gold fs-5"><i class="bi bi-youtube"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-6">
+          <h6 class="text-gold fw-bold mb-3 text-uppercase letter-spacing">Explore</h6>
+          <ul class="list-unstyled footer-links">
+            <li><a href="/attractions/">Attractions</a></li>
+            <li><a href="/guides/">Tour Guides</a></li>
+            <li><a href="/hotels/">Hotels</a></li>
+            <li><a href="/restaurants/">Restaurants</a></li>
+            <li><a href="/events/">Events</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-6">
+          <h6 class="text-gold fw-bold mb-3 text-uppercase letter-spacing">EDSTA</h6>
+          <ul class="list-unstyled footer-links">
+            <li><a href="/about">About EDSTA</a></li>
+            <li><a href="/news/">Tourism News</a></li>
+            <li><a href="/faq">FAQs</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/privacy">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-gold fw-bold mb-3 text-uppercase letter-spacing">Quick Login (Demo)</h6>
+          <div class="d-flex flex-wrap gap-1 mb-3">
+            <a href="/auth/quick-login/admin" class="btn btn-outline-gold btn-sm"><i class="bi bi-shield-fill me-1"></i>Admin</a>
+            <a href="/auth/quick-login/tourist" class="btn btn-outline-light btn-sm"><i class="bi bi-person me-1"></i>Tourist</a>
+            <a href="/auth/quick-login/guide" class="btn btn-outline-light btn-sm"><i class="bi bi-person-badge me-1"></i>Guide</a>
+            <a href="/auth/quick-login/hotel" class="btn btn-outline-light btn-sm"><i class="bi bi-building me-1"></i>Hotel</a>
+          </div>
+          <h6 class="text-gold fw-bold mb-2 text-uppercase letter-spacing" style="font-size:0.7rem">Contact</h6>
+          <p class="text-white-50 small mb-1"><i class="bi bi-geo-alt me-1"></i>EDSTA Headquarters, Government House Road, GRA, Benin City, Edo State, Nigeria</p>
+          <p class="text-white-50 small mb-1"><i class="bi bi-telephone me-1"></i>+234 (0) 52 255 000</p>
+          <p class="text-white-50 small"><i class="bi bi-envelope me-1"></i>info@edsta.edo.gov.ng</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom py-2 text-center">
+    <small class="text-white-50">© 2026 Edo State Tourism Agency (EDSTA). All rights reserved.</small>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/main.js"></script>
+
+</body>
+</html>

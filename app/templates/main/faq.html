@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}FAQs – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item active">FAQs</li></ol></nav><h1><i class="bi bi-question-circle me-2 text-gold"></i>Frequently Asked Questions</h1></div></div>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      {% if faqs %}
+      {% set groups = {} %}
+      {% for f in faqs %}{% if f.category not in groups %}{% set _ = groups.update({f.category: []}) %}{% endif %}{% set _ = groups[f.category].append(f) %}{% endfor %}
+      {% for group, items in groups.items() %}
+      <h5 class="fw-bold text-blue mt-4 mb-3 text-capitalize">{{ group }}</h5>
+      <div class="accordion mb-3" id="faq-{{ loop.index }}">
+        {% for f in items %}
+        <div class="accordion-item border-0 shadow-sm mb-2 rounded-3">
+          <h2 class="accordion-header">
+            <button class="accordion-button {% if not loop.first %}collapsed{% endif %} fw-semibold rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#f{{ f.id }}">
+              {{ f.question }}
+            </button>
+          </h2>
+          <div id="f{{ f.id }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#faq-{{ loop.index }}">
+            <div class="accordion-body text-muted lh-lg">{{ f.answer }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="text-center py-5"><i class="bi bi-question-circle text-muted" style="font-size:4rem"></i><h4 class="text-muted mt-3">No FAQs yet</h4></div>
+      {% endif %}
+      <div class="bg-blue-100 p-4 rounded-3 mt-5 text-center">
+        <h5 class="fw-bold text-blue">Still have questions?</h5>
+        <p class="text-muted mb-3">Our team is happy to help you plan your Edo odyssey.</p>
+        <a href="{{ url_for('main.contact') }}" class="btn btn-blue px-4"><i class="bi bi-envelope me-2"></i>Contact ESTA</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

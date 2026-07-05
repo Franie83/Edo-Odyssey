@@ -1,0 +1,24 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ title }} – Admin{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="col-lg-9">
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3">
+          <div class="col-12"><label class="form-label fw-semibold small">Article Title *</label><input type="text" name="title" class="form-control" value="{{ article.title if article else '' }}" required></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">Category *</label><input type="text" name="category" class="form-control" value="{{ article.category if article else '' }}" required placeholder="Government, Culture, Tourism…"></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">Author</label><input type="text" name="author" class="form-control" value="{{ article.author if article else current_user.full_name }}"></div>
+          <div class="col-12"><label class="form-label fw-semibold small">Tags (comma-separated)</label><input type="text" name="tags" class="form-control" value="{{ article.tags if article else '' }}" placeholder="Heritage, Tourism, Culture"></div>
+          <div class="col-12"><label class="form-label fw-semibold small">Content *</label><textarea name="content" class="form-control" rows="10" required>{{ article.content if article else '' }}</textarea></div>
+          <div class="col-12"><label class="form-label fw-semibold small">Image URL (or upload)</label><input type="url" name="image_url" class="form-control mb-1" value="{{ article.image_url if article else '' }}" placeholder="https://…"><input type="file" name="image" class="form-control" accept="image/*"></div>
+          <div class="col-12"><div class="form-check form-switch"><input type="checkbox" name="featured" class="form-check-input" id="featSw" {% if article and article.featured %}checked{% endif %}><label class="form-check-label" for="featSw">Featured Article</label></div></div>
+        </div>
+        <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-gold px-4">Publish Article</button><a href="{{ url_for('admin.news') }}" class="btn btn-outline-secondary">Cancel</a></div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

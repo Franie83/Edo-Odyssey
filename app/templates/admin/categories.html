@@ -1,0 +1,42 @@
+{% extends "admin/base.html" %}
+{% block title %}Categories – Admin{% endblock %}
+{% block page_title %}Categories{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0 admin-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Icon</th><th>Color</th><th>Actions</th></tr></thead>
+          <tbody>
+          {% for c in categories %}
+          <tr>
+            <td class="fw-semibold small text-blue">{{ c.name }}</td>
+            <td><span class="badge bg-blue-100 text-blue" style="font-size:.65rem">{{ c.type }}</span></td>
+            <td><i class="bi {{ c.icon or 'bi-tag' }}" style="color:{{ c.color or '#1a3a6b' }};font-size:1.1rem"></i></td>
+            <td><div class="d-inline-block rounded" style="width:20px;height:20px;background:{{ c.color or '#1a3a6b' }};border:1px solid #dee2e6"></div></td>
+            <td><form method="POST" action="{{ url_for('admin.category_delete', id=c.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-danger btn-sm py-0" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></button></form></td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0">Add Category</h6></div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('admin.category_create') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="mb-2"><label class="form-label small fw-semibold">Name</label><input type="text" name="name" class="form-control" required></div>
+          <div class="mb-2"><label class="form-label small fw-semibold">Type</label><select name="type" class="form-select"><option value="attraction">Attraction</option><option value="event">Event</option><option value="hotel">Hotel</option><option value="restaurant">Restaurant</option><option value="news">News</option></select></div>
+          <div class="mb-2"><label class="form-label small fw-semibold">Bootstrap Icon class</label><input type="text" name="icon" class="form-control" placeholder="bi-building" value="bi-tag"></div>
+          <div class="mb-2"><label class="form-label small fw-semibold">Color</label><input type="color" name="color" class="form-control form-control-color" value="#1a3a6b"></div>
+          <button type="submit" class="btn btn-gold w-100"><i class="bi bi-plus me-1"></i>Create</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

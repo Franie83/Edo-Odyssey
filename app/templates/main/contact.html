@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Contact ESTA – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item active">Contact</li></ol></nav><h1><i class="bi bi-envelope-fill me-2 text-gold"></i>Contact Us</h1></div></div>
+<div class="container py-5">
+  <div class="row g-5">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h4 class="fw-bold text-blue mb-4">Send Us a Message</h4>
+          <form method="POST" action="{{ url_for('main.contact') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label fw-semibold small">Full Name *</label><input type="text" name="name" class="form-control" required placeholder="Your name"></div>
+              <div class="col-md-6"><label class="form-label fw-semibold small">Email *</label><input type="email" name="email" class="form-control" required placeholder="you@email.com"></div>
+              <div class="col-12"><label class="form-label fw-semibold small">Subject *</label><input type="text" name="subject" class="form-control" required placeholder="Reason for contacting ESTA"></div>
+              <div class="col-12"><label class="form-label fw-semibold small">Message *</label><textarea name="message" class="form-control" rows="6" required placeholder="Tell us how we can help…"></textarea></div>
+            </div>
+            <button type="submit" class="btn btn-blue mt-3 px-4 fw-semibold"><i class="bi bi-send me-2"></i>Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="sidebar-card mb-4">
+        <h6>Contact Information</h6>
+        <ul class="list-unstyled text-muted">
+          <li class="mb-3"><i class="bi bi-geo-alt-fill text-gold fs-5 me-2"></i>{{ cms.get('contact_address','Ministry of Tourism HQ, Benin City, Edo State') }}</li>
+          <li class="mb-3"><i class="bi bi-telephone-fill text-gold fs-5 me-2"></i>{{ cms.get('contact_phone','+234 52 123 4567') }}</li>
+          <li class="mb-3"><i class="bi bi-envelope-fill text-gold fs-5 me-2"></i>{{ cms.get('contact_email','info@edotourism.gov.ng') }}</li>
+          <li class="mb-0"><i class="bi bi-clock-fill text-gold fs-5 me-2"></i>Mon–Fri, 8AM–4PM</li>
+        </ul>
+      </div>
+      <div class="sidebar-card">
+        <h6>Follow ESTA</h6>
+        <div class="d-flex gap-3 fs-4">
+          <a href="#" class="text-blue hover-gold"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="text-blue hover-gold"><i class="bi bi-twitter-x"></i></a>
+          <a href="#" class="text-blue hover-gold"><i class="bi bi-instagram"></i></a>
+          <a href="#" class="text-blue hover-gold"><i class="bi bi-youtube"></i></a>
+        </div>
+      </div>
+      <div class="sidebar-card">
+        <h6>Quick Links</h6>
+        <div class="d-flex flex-column gap-1">
+          <a href="{{ url_for('main.faq') }}" class="btn btn-outline-secondary btn-sm text-start"><i class="bi bi-question-circle me-2"></i>FAQs</a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-blue btn-sm text-start"><i class="bi bi-person-plus me-2"></i>Register as a Guide / Hotel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

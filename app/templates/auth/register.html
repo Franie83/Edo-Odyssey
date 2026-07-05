@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Register – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center" style="background:linear-gradient(135deg,var(--blue-900) 0%,var(--blue-700) 100%)">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-7 col-lg-6">
+        <div class="text-center mb-4">
+          <div class="brand-icon mx-auto mb-3" style="width:56px;height:56px;font-size:1.6rem"><i class="bi bi-compass-fill"></i></div>
+          <h2 class="text-white fw-bold" style="font-family:'Playfair Display',serif">Join Edo Odyssey</h2>
+          <p class="text-white-50 small">Create your account and start exploring Edo State</p>
+        </div>
+        <div class="card border-0 shadow-lg" style="border-radius:16px">
+          <div class="card-body p-4">
+            <form method="POST" action="{{ url_for('auth.register') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <div class="row g-3">
+                <div class="col-6">
+                  <label class="form-label fw-semibold small">First Name</label>
+                  <input type="text" name="first_name" class="form-control bg-blue-100 border-0" placeholder="Akenzua" required>
+                </div>
+                <div class="col-6">
+                  <label class="form-label fw-semibold small">Last Name</label>
+                  <input type="text" name="last_name" class="form-control bg-blue-100 border-0" placeholder="Musa" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold small">Email Address</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-blue-100 border-0"><i class="bi bi-envelope text-blue"></i></span>
+                    <input type="email" name="email" class="form-control bg-blue-100 border-0" placeholder="you@email.com" required>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold small">Phone Number</label>
+                  <input type="text" name="phone" class="form-control bg-blue-100 border-0" placeholder="+234…">
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold small">Account Type</label>
+                  <select name="role" class="form-select bg-blue-100 border-0">
+                    <option value="Tourist" selected>Tourist – Explore Edo State</option>
+                    <option value="Guide">Guide – Offer Guided Tours</option>
+                    <option value="Hotel">Hotel – List My Property</option>
+                    <option value="Restaurant">Restaurant – List My Business</option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label fw-semibold small">Password</label>
+                  <input type="password" name="password" class="form-control bg-blue-100 border-0" placeholder="Min 6 chars" required minlength="6">
+                </div>
+                <div class="col-6">
+                  <label class="form-label fw-semibold small">Confirm Password</label>
+                  <input type="password" name="confirm_password" class="form-control bg-blue-100 border-0" placeholder="Repeat" required>
+                </div>
+                <div class="col-12">
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="agree" required>
+                    <label class="form-check-label small" for="agree">I agree to the <a href="{{ url_for('main.terms') }}" class="text-blue">Terms</a> and <a href="{{ url_for('main.privacy') }}" class="text-blue">Privacy Policy</a></label>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-blue w-100 fw-semibold py-2">Create Account <i class="bi bi-arrow-right ms-1"></i></button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="card-footer bg-gray-50 text-center py-3" style="border-radius:0 0 16px 16px">
+            <small>Already have an account? <a href="{{ url_for('auth.login') }}" class="text-blue fw-semibold">Sign In</a></small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

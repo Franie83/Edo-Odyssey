@@ -1,0 +1,134 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ title }} – Admin{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Name *</label>
+              <input type="text" name="name" class="form-control" value="{{ attraction.name if attraction else '' }}" required>
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Category</label>
+              <select name="category_id" class="form-select">
+                <option value="">-- Select --</option>
+                {% for c in categories %}
+                <option value="{{ c.id }}" {% if attraction and attraction.category_id==c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Ticket Price (₦)</label>
+              <input type="number" name="ticket_price" class="form-control" value="{{ attraction.ticket_price if attraction else 0 }}" min="0" step="0.01">
+            </div>
+            
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Description *</label>
+              <textarea name="description" class="form-control" rows="4" required>{{ attraction.description if attraction else '' }}</textarea>
+            </div>
+            
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Historical Background</label>
+              <textarea name="history" class="form-control" rows="4">{{ attraction.history if attraction else '' }}</textarea>
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Address *</label>
+              <input type="text" name="address" class="form-control" value="{{ attraction.address if attraction else '' }}" required>
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Opening Hours</label>
+              <input type="text" name="opening_hours" class="form-control" value="{{ attraction.opening_hours if attraction else '' }}" placeholder="Mon–Sat 9AM–5PM">
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Latitude *</label>
+              <input type="number" name="latitude" step="any" class="form-control" value="{{ attraction.latitude if attraction else 6.34 }}" required>
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Longitude *</label>
+              <input type="number" name="longitude" step="any" class="form-control" value="{{ attraction.longitude if attraction else 5.62 }}" required>
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Contact</label>
+              <input type="text" name="contact" class="form-control" value="{{ attraction.contact if attraction else '' }}">
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Website</label>
+              <input type="url" name="website" class="form-control" value="{{ attraction.website if attraction else '' }}" placeholder="https://…">
+            </div>
+            
+            <!-- Image Upload Section - No URL field! -->
+            <div class="col-12">
+              <div class="card bg-light">
+                <div class="card-header">
+                  <h6 class="mb-0"><i class="bi bi-image me-2"></i>Attraction Image</h6>
+                </div>
+                <div class="card-body">
+                  {% if attraction and attraction.image_url %}
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold small">Current Image</label>
+                    <div>
+                      <img src="{{ attraction.image_url }}" 
+                           class="img-thumbnail" 
+                           style="max-height:200px;max-width:100%;object-fit:cover"
+                           alt="{{ attraction.name }}"
+                           onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
+                    </div>
+                    <small class="text-muted">Current image will be replaced if you upload a new one.</small>
+                  </div>
+                  {% endif %}
+                  
+                  <div class="mb-2">
+                    <label class="form-label fw-semibold small">
+                      {% if attraction and attraction.image_url %}Replace Image{% else %}Upload Image{% endif %}
+                    </label>
+                    <input type="file" 
+                           name="image" 
+                           class="form-control" 
+                           accept="image/*">
+                    <div class="form-text small">Supported formats: JPG, PNG, GIF, WebP. Max size: 16MB. Images will be automatically optimized.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="d-flex gap-4">
+                <div class="form-check form-switch">
+                  <input type="checkbox" name="featured" class="form-check-input" id="featuredSwitch" {% if attraction and attraction.featured %}checked{% endif %}>
+                  <label class="form-check-label" for="featuredSwitch">Featured</label>
+                </div>
+                <div class="form-check form-switch">
+                  <input type="checkbox" name="active" class="form-check-input" id="activeSwitch" {% if not attraction or attraction.active %}checked{% endif %}>
+                  <label class="form-check-label" for="activeSwitch">Active</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-gold px-4">
+              <i class="bi bi-save me-1"></i>Save Attraction
+            </button>
+            <a href="{{ url_for('admin.attractions') }}" class="btn btn-outline-secondary">
+              <i class="bi bi-x-circle me-1"></i>Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

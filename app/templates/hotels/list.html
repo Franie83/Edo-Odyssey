@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Hotels – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item active">Hotels</li></ol></nav><h1><i class="bi bi-building-fill me-2 text-gold"></i>Hotels & Accommodations</h1><p class="text-white-50">{{ pagination.total }} properties across Edo State</p></div></div>
+<div class="container py-4">
+  <form method="GET" class="filter-bar mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-4"><input type="text" name="q" class="form-control" placeholder="Search hotels…" value="{{ search_q }}"></div>
+      <div class="col-md-3">
+        <select name="stars" class="form-select">
+          <option value="">All Star Ratings</option>
+          {% for s in [5,4,3,2,1] %}<option value="{{ s }}" {% if selected_stars==s %}selected{% endif %}>{{ s }} Star{% if s > 1 %}s{% endif %}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select name="sort" class="form-select">
+          <option value="name" {% if sort=='name' %}selected{% endif %}>Name A-Z</option>
+          <option value="price_asc" {% if sort=='price_asc' %}selected{% endif %}>Price: Low → High</option>
+          <option value="price_desc" {% if sort=='price_desc' %}selected{% endif %}>Price: High → Low</option>
+          <option value="stars" {% if sort=='stars' %}selected{% endif %}>Most Stars</option>
+        </select>
+      </div>
+      <div class="col-md-2"><button type="submit" class="btn btn-blue w-100"><i class="bi bi-search"></i></button></div>
+    </div>
+  </form>
+  {% if hotels %}
+  <div class="row g-4">
+    {% for h in hotels %}
+    <div class="col-md-6 col-lg-4">
+      <div class="hotel-card card h-100">
+        <div class="card-img-wrap">
+          <img src="{{ h.image_url or 'https://placehold.co/800x500/1a3a6b/ffffff?text=Hotel' }}" alt="{{ h.name }}" loading="lazy">
+          <div class="card-price-badge">₦{{ '{:,.0f}'.format(h.price_per_night) }}/night</div>
+          {% if h.featured %}<div style="position:absolute;bottom:10px;left:10px"><span class="badge bg-gold text-dark">Featured</span></div>{% endif %}
+        </div>
+        <div class="card-body d-flex flex-column">
+          <div class="text-gold mb-1">{% for i in range(h.stars) %}<i class="bi bi-star-fill" style="font-size:.75rem"></i>{% endfor %}</div>
+          <h5 class="card-title fw-bold text-blue mb-1">{{ h.name }}</h5>
+          <div class="star-rating mb-1">{% for i in range(1,6) %}<i class="bi bi-star{% if i <= h.avg_rating %}-fill{% endif %}"></i>{% endfor %} <span class="text-muted small">({{ h.avg_rating }})</span></div>
+          <p class="text-muted small text-truncate-2 flex-grow-1">{{ h.description }}</p>
+          <div class="d-flex flex-wrap gap-1 mb-2">{% for f in h.facilities_list[:4] %}<span class="badge bg-blue-100 text-blue" style="font-size:.65rem">{{ f }}</span>{% endfor %}</div>
+          <small class="text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>{{ h.address[:50] }}</small>
+          <div class="d-flex gap-2 mt-auto">
+            <a href="{{ url_for('hotels.detail', id=h.id) }}" class="btn btn-outline-secondary btn-sm flex-grow-1">Details</a>
+            <a href="{{ url_for('bookings.new_booking', booking_type='Hotel', target_id=h.id) }}" class="btn btn-gold btn-sm flex-grow-1">Book</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}<div class="text-center py-5"><i class="bi bi-building-x text-muted" style="font-size:4rem"></i><h4 class="text-muted mt-3">No hotels found</h4><a href="{{ url_for('hotels.list_hotels') }}" class="btn btn-blue mt-2">Clear Filters</a></div>{% endif %}
+</div>
+{% endblock %}

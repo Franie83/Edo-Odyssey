@@ -1,0 +1,105 @@
+{% extends "admin/base.html" %}
+{% block title %}Analytics – Admin{% endblock %}
+{% block page_title %}Analytics & Reports{% endblock %}
+{% block page_subtitle %}Platform performance intelligence{% endblock %}
+{% block content %}
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="admin-stat" style="border-left-color:var(--gold-500)"><div class="admin-stat-icon bg-gold-100" style="color:var(--gold-600)"><i class="bi bi-cash-coin"></i></div><div><div class="admin-stat-value text-gold">₦{{ '{:,.0f}'.format(total_revenue) }}</div><div class="admin-stat-label">Total Revenue (12mo)</div></div></div></div>
+  <div class="col-md-4"><div class="admin-stat"><div class="admin-stat-icon bg-blue-100" style="color:var(--blue-800)"><i class="bi bi-calendar-check-fill"></i></div><div><div class="admin-stat-value text-blue">{{ total_bookings }}</div><div class="admin-stat-label">Total Bookings (12mo)</div></div></div></div>
+  <div class="col-md-4">
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin.export_csv') }}" class="btn btn-outline-secondary flex-grow-1"><i class="bi bi-filetype-csv me-1"></i>Export CSV</a>
+      <a href="{{ url_for('admin.export_excel') }}" class="btn btn-gold flex-grow-1"><i class="bi bi-file-earmark-excel me-1"></i>Export Excel</a>
+    </div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-graph-up-arrow me-2 text-gold"></i>Monthly Bookings & Revenue (12 Months)</h6></div>
+      <div class="card-body"><canvas id="monthlyChart" height="130"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-pie-chart me-2 text-gold"></i>Bookings by Type</h6></div>
+      <div class="card-body"><canvas id="typeChart" height="180"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-people me-2 text-gold"></i>User Roles</h6></div>
+      <div class="card-body"><canvas id="roleChart" height="180"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-trophy me-2 text-gold"></i>Top Attractions by Views</h6></div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for a in top_attractions %}
+          <li class="list-group-item d-flex justify-content-between py-2 px-3">
+            <div class="small fw-semibold text-truncate" style="max-width:170px">{{ a.name }}</div>
+            <div class="d-flex gap-2 align-items-center"><span class="badge bg-blue-100 text-blue">{{ a.views }} views</span><span class="badge bg-gold-100 text-gold-600">{{ a.avg_rating }}★</span></div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-qr-code-scan me-2 text-gold"></i>Top QR Scans</h6></div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for q in qr_stats %}
+          <li class="list-group-item d-flex justify-content-between py-2 px-3">
+            <div class="small text-truncate" style="max-width:170px">{{ q.attraction.name if q.attraction else '—' }}</div>
+            <span class="badge bg-blue-100 text-blue">{{ q.scanned_count }} scans</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const monthly = {{ monthly | safe }};
+const bookingTypes = {{ booking_types | safe }};
+const roleCounts = {{ role_counts | safe }};
+const BLUE = '#1a3a6b', GOLD = '#c9a227';
+const COLORS = ['#1a3a6b','#c9a227','#2d8a4e','#e05c27','#8a2d8a','#1a7abf'];
+
+new Chart(document.getElementById('monthlyChart'), {
+  type: 'line',
+  data: {
+    labels: monthly.map(d => d.month),
+    datasets: [
+      { label: 'Bookings', data: monthly.map(d => d.count), borderColor: BLUE, backgroundColor: 'rgba(26,58,107,.1)', fill: true, tension: .4 },
+      { label: 'Revenue (₦000)', data: monthly.map(d => d.revenue/1000), borderColor: GOLD, backgroundColor: 'rgba(201,162,39,.1)', fill: true, tension: .4, yAxisID: 'y2' },
+    ]
+  },
+  options: { responsive: true, scales: { y: { beginAtZero: true }, y2: { position: 'right', beginAtZero: true, grid: { display: false } } } }
+});
+
+new Chart(document.getElementById('typeChart'), {
+  type: 'doughnut',
+  data: { labels: bookingTypes.map(d => d.type), datasets: [{ data: bookingTypes.map(d => d.count), backgroundColor: COLORS }] },
+  options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+
+new Chart(document.getElementById('roleChart'), {
+  type: 'pie',
+  data: { labels: roleCounts.map(d => d.role), datasets: [{ data: roleCounts.map(d => d.count), backgroundColor: COLORS }] },
+  options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+</script>
+{% endblock %}

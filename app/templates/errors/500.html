@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}500 Server Error – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center" style="background:linear-gradient(135deg,var(--blue-900),var(--blue-700))">
+  <div class="container text-center py-5">
+    <div class="brand-icon mx-auto mb-4" style="width:80px;height:80px;font-size:2.5rem;background:rgba(220,53,69,.2);border:2px solid #dc3545"><i class="bi bi-exclamation-triangle text-danger"></i></div>
+    <h1 class="text-white" style="font-family:'Playfair Display',serif;font-size:5rem;font-weight:700">500</h1>
+    <h2 class="text-gold mb-3">Something Went Wrong</h2>
+    <p class="text-white-50 mb-4">An unexpected error occurred on our server.<br>Our team has been notified and is working on a fix.</p>
+    <a href="{{ url_for('main.home') }}" class="btn btn-gold btn-lg px-4"><i class="bi bi-house me-2"></i>Return Home</a>
+  </div>
+</div>
+{% endblock %}

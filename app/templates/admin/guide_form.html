@@ -1,0 +1,128 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} – Admin{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Manage certified tour guides{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        {% if guide and guide.user %}
+        <div class="mb-4 p-3 bg-blue-100 rounded-3">
+          <div class="fw-bold text-blue">{{ guide.user.full_name }}</div>
+          <div class="text-muted small">{{ guide.user.email }}</div>
+        </div>
+        {% endif %}
+
+        <form method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+          
+          <div class="row g-3">
+            <!-- User Selection (only for new guides) -->
+            {% if not guide %}
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Select User *</label>
+              <select name="user_id" class="form-select" required>
+                <option value="">-- Select a user --</option>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.full_name }} ({{ user.email }})</option>
+                {% endfor %}
+              </select>
+              <div class="form-text small">Only users with Guide, Admin, or Super Admin roles are shown.</div>
+            </div>
+            {% endif %}
+
+            <!-- Phone Number -->
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Phone Number *</label>
+              <input type="tel" name="phone" class="form-control" value="{{ guide.phone if guide else '' }}" placeholder="+234 800 000 0000" required>
+              <div class="form-text small">Include country code for international visitors.</div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Bio</label>
+              <textarea name="bio" class="form-control" rows="4">{{ guide.bio if guide else '' }}</textarea>
+              <div class="form-text small">Professional summary that will appear on the guide's public profile.</div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Languages (comma-separated) *</label>
+              <input type="text" name="languages" class="form-control" value="{{ guide.languages if guide else '' }}" placeholder="English, Edo, French" required>
+              <div class="form-text small">List all languages the guide speaks fluently.</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">Experience (years) *</label>
+              <input type="number" name="experience" class="form-control" value="{{ guide.experience if guide else 0 }}" min="0" required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">Hourly Rate (₦) *</label>
+              <input type="number" name="hourly_rate" class="form-control" value="{{ guide.hourly_rate if guide else 0 }}" min="0" step="0.01" required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">Daily Rate (₦)</label>
+              <input type="number" name="daily_rate" class="form-control" value="{{ guide.daily_rate if guide else 0 }}" min="0" step="0.01">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Specializations</label>
+              <input type="text" name="specializations" class="form-control" value="{{ guide.specializations if guide else '' }}" placeholder="Royal History, Bronze Art, Heritage Sites">
+              <div class="form-text small">Areas of expertise (e.g., Royal History, Wildlife, Cultural Tours).</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">License Number</label>
+              <input type="text" name="license_number" class="form-control" value="{{ guide.license_number if guide else '' }}" placeholder="EDSTA-G-2024-001">
+              <div class="form-text small">Official guide license number issued by EDSTA.</div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Verification Status</label>
+              <select name="verification_status" class="form-select">
+                <option value="Pending" {% if guide and guide.verification_status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Approved" {% if guide and guide.verification_status == 'Approved' %}selected{% endif %}>Approved</option>
+                <option value="Rejected" {% if guide and guide.verification_status == 'Rejected' %}selected{% endif %}>Rejected</option>
+              </select>
+              <div class="form-text small">Only approved guides appear on the public site.</div>
+            </div>
+          </div>
+
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-gold px-4">
+              <i class="bi bi-save me-1"></i>Save Guide
+            </button>
+            <a href="{{ url_for('admin.guides') }}" class="btn btn-outline-secondary">
+              <i class="bi bi-x-circle me-1"></i>Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar info -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold text-blue mb-3"><i class="bi bi-info-circle me-2"></i>Guide Information</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-2"><i class="bi bi-person me-2 text-gold"></i>Guides are linked to user accounts</li>
+          <li class="mb-2"><i class="bi bi-phone me-2 text-gold"></i>Phone number is displayed on the public profile</li>
+          <li class="mb-2"><i class="bi bi-check-circle me-2 text-gold"></i>Only approved guides appear on the public site</li>
+          <li class="mb-2"><i class="bi bi-currency-naira me-2 text-gold"></i>Rates are displayed on the guide profile</li>
+          <li class="mb-2"><i class="bi bi-tag me-2 text-gold"></i>Specializations help users find the right guide</li>
+        </ul>
+        <hr>
+        <div class="text-muted small">
+          <p class="mb-1"><i class="bi bi-clock me-1"></i>Created: {{ guide.created_at.strftime('%d %b %Y %H:%M') if guide and guide.created_at else '—' }}</p>
+          <p class="mb-0"><i class="bi bi-pencil me-1"></i>Updated: {{ guide.updated_at.strftime('%d %b %Y %H:%M') if guide and guide.updated_at else '—' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

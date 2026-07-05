@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero py-4">
+  <div class="container">
+    <div class="d-flex align-items-center gap-3">
+      {% if current_user.avatar_url %}
+      <img src="{{ current_user.avatar_url }}" class="rounded-circle border border-gold border-3" width="60" height="60" alt="">
+      {% else %}
+      <div class="avatar-lg">{{ current_user.first_name[0] }}{{ current_user.last_name[0] }}</div>
+      {% endif %}
+      <div>
+        <h1 class="mb-0" style="font-size:1.6rem">Welcome, {{ current_user.first_name }}!</h1>
+        <p class="text-white-50 mb-0 small">{{ current_user.role }} Account · <i class="bi bi-trophy-fill text-gold me-1"></i>{{ current_user.heritage_points or 0 }} Heritage Points</p>
+      </div>
+      <div class="ms-auto d-flex gap-2">
+        <a href="{{ url_for('dashboard.profile') }}" class="btn btn-outline-gold btn-sm"><i class="bi bi-person me-1"></i>Profile</a>
+        {% if current_user.is_admin %}<a href="{{ url_for('admin.dashboard') }}" class="btn btn-gold btn-sm"><i class="bi bi-shield-check me-1"></i>Admin Panel</a>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <!-- Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="stat-icon bg-blue-100"><i class="bi bi-calendar-check text-blue"></i></div>
+          <span class="badge bg-blue-100 text-blue">{{ stats.pending_bookings }} pending</span>
+        </div>
+        <div class="stat-number">{{ stats.total_bookings }}</div>
+        <div class="small text-muted">Total Bookings</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card" style="border-bottom-color:var(--gold-500)">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="stat-icon bg-gold-100"><i class="bi bi-check-circle text-gold"></i></div>
+        </div>
+        <div class="stat-number">{{ stats.completed_bookings }}</div>
+        <div class="small text-muted">Completed Trips</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card" style="border-bottom-color:#2d8a4e">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="stat-icon" style="background:#e8f5e9"><i class="bi bi-star text-success"></i></div>
+        </div>
+        <div class="stat-number">{{ stats.total_reviews }}</div>
+        <div class="small text-muted">Reviews Given</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card" style="border-bottom-color:#c9a227">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="stat-icon bg-gold-100"><i class="bi bi-trophy text-gold"></i></div>
+        </div>
+        <div class="stat-number">{{ stats.heritage_points }}</div>
+        <div class="small text-muted">Heritage Points</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Bookings -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-3 pb-1 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold text-blue"><i class="bi bi-calendar-check me-2 text-gold"></i>My Bookings</h5>
+          <div class="d-flex gap-2">
+            <a href="{{ url_for('attractions.list_attractions') }}" class="btn btn-gold btn-sm"><i class="bi bi-plus me-1"></i>New Booking</a>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          {% if bookings %}
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light"><tr><th>Ref</th><th>Type</th><th>Target</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+              {% for b in bookings %}
+              <tr>
+                <td><code class="text-blue">{{ b.reference_code }}</code></td>
+                <td><span class="badge bg-blue-100 text-blue">{{ b.booking_type }}</span></td>
+                <td class="small">{{ b.target_name or '—' }}</td>
+                <td class="small">{{ b.start_date.strftime('%d %b %Y') }}</td>
+                <td class="fw-semibold text-gold">₦{{ '{:,.0f}'.format(b.total_price) }}</td>
+                <td>
+                  {% if b.booking_status == 'Confirmed' or b.booking_status == 'Approved' %}<span class="status-badge" style="background:#d4edda;color:#155724">{{ b.booking_status }}</span>
+                  {% elif b.booking_status == 'Pending' %}<span class="status-badge" style="background:#fff3cd;color:#856404">Pending</span>
+                  {% elif b.booking_status == 'Completed' %}<span class="status-badge" style="background:#d1ecf1;color:#0c5460">Completed</span>
+                  {% elif b.booking_status == 'Cancelled' %}<span class="status-badge" style="background:#f8d7da;color:#721c24">Cancelled</span>
+                  {% else %}<span class="status-badge bg-secondary text-white">{{ b.booking_status }}</span>{% endif %}
+                </td>
+                <td>
+                  {% if b.booking_status == 'Pending' %}
+                  <form method="POST" action="{{ url_for('bookings.cancel_booking', id=b.id) }}" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-outline-danger btn-sm py-0" onclick="return confirm('Cancel this booking?')">Cancel</button>
+                  </form>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-calendar-x" style="font-size:2.5rem"></i>
+            <p class="mt-2">No bookings yet. <a href="{{ url_for('attractions.list_attractions') }}" class="text-blue">Start exploring!</a></p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white border-0 pt-3 pb-1"><h5 class="mb-0 fw-bold text-blue"><i class="bi bi-star me-2 text-gold"></i>My Reviews</h5></div>
+        <div class="card-body">
+          {% if reviews %}
+          {% for r in reviews %}
+          <div class="d-flex gap-3 border-bottom pb-2 mb-2">
+            <div><div class="star-rating">{% for i in range(1,6) %}<i class="bi bi-star{% if i <= r.rating %}-fill{% endif %}"></i>{% endfor %}</div>
+            <div class="small text-muted mt-1">{{ r.target_type }} · {{ r.created_at.strftime('%d %b %Y') }}</div></div>
+            <p class="small text-muted mb-0 flex-grow-1">{{ r.comment[:100] }}{% if r.comment|length > 100 %}…{% endif %}</p>
+          </div>
+          {% endfor %}
+          {% else %}<p class="text-muted small">No reviews yet.</p>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar: Notifications + Quick Links -->
+    <div class="col-lg-4">
+      <!-- Heritage Points Card -->
+      <div class="sidebar-card text-center" style="border-left:4px solid var(--gold-500)">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="mb-0"><i class="bi bi-trophy-fill text-gold me-1"></i>Heritage Points</h6>
+          </div>
+          <div>
+            <span class="badge bg-gold text-dark fs-6 px-3 py-2">{{ current_user.heritage_points or 0 }}</span>
+          </div>
+        </div>
+        <div class="mt-2">
+          {% set points = current_user.heritage_points or 0 %}
+          {% if points >= 500 %}
+            <span class="badge bg-gold text-dark fs-6">🏆 Platinum Explorer</span>
+          {% elif points >= 200 %}
+            <span class="badge bg-success fs-6">🥇 Gold Explorer</span>
+          {% elif points >= 100 %}
+            <span class="badge bg-info text-dark fs-6">🥈 Silver Explorer</span>
+          {% elif points >= 50 %}
+            <span class="badge bg-secondary fs-6">🥉 Bronze Explorer</span>
+          {% else %}
+            <span class="badge bg-light text-dark fs-6">⭐ Explorer</span>
+          {% endif %}
+        </div>
+        <div class="progress mt-3" style="height: 10px; border-radius: 10px;">
+          {% if points >= 500 %}
+            {% set progress = 100 %}
+          {% elif points >= 200 %}
+            {% set progress = ((points - 200) / 300 * 100) %}
+          {% elif points >= 100 %}
+            {% set progress = ((points - 100) / 100 * 100) %}
+          {% elif points >= 50 %}
+            {% set progress = ((points - 50) / 50 * 100) %}
+          {% else %}
+            {% set progress = (points / 50 * 100) %}
+          {% endif %}
+          <div class="progress-bar bg-gold" style="width: {{ progress }}%; border-radius: 10px;"></div>
+        </div>
+        <small class="text-muted mt-2 d-block">
+          {% if points < 50 %}
+            {{ 50 - points }} points to Bronze 🥉
+          {% elif points < 100 %}
+            {{ 100 - points }} points to Silver 🥈
+          {% elif points < 200 %}
+            {{ 200 - points }} points to Gold 🥇
+          {% elif points < 500 %}
+            {{ 500 - points }} points to Platinum 🏆
+          {% else %}
+            🌟 Max Level Achieved!
+          {% endif %}
+        </small>
+        <hr>
+        <div class="row g-1 text-start small">
+          <div class="col-6"><i class="bi bi-pencil-square text-gold me-1"></i>Review: +10 pts</div>
+          <div class="col-6"><i class="bi bi-calendar-check text-gold me-1"></i>Booking: +20 pts</div>
+          <div class="col-6"><i class="bi bi-heart text-gold me-1"></i>Favourite: +5 pts</div>
+          <div class="col-6"><i class="bi bi-check-circle text-gold me-1"></i>Tour Complete: +30 pts</div>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="sidebar-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6>Notifications <span class="badge bg-danger ms-1">{{ notifications | selectattr('is_read','false') | list | length }}</span></h6>
+          {% if notifications | selectattr('is_read','false') | list | length > 0 %}
+          <form method="POST" action="{{ url_for('dashboard.mark_all_read') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-link btn-sm p-0 text-muted small">Mark all read</button>
+          </form>
+          {% endif %}
+        </div>
+        {% for n in notifications[:6] %}
+        <div class="d-flex gap-2 mb-2 p-2 rounded {{ 'bg-blue-100' if not n.is_read else '' }}">
+          <i class="bi bi-bell{% if not n.is_read %}-fill text-gold{% else %} text-muted{% endif %} flex-shrink-0 mt-1"></i>
+          <div>
+            <div class="small fw-semibold">{{ n.title }}</div>
+            <div class="text-muted" style="font-size:.75rem">{{ n.message[:80] }}{% if n.message|length>80 %}…{% endif %}</div>
+            <div class="text-muted" style="font-size:.65rem">{{ n.created_at.strftime('%d %b %Y %H:%M') }}</div>
+          </div>
+        </div>
+        {% endfor %}
+        {% if not notifications %}<p class="text-muted small mb-0">No notifications.</p>{% endif %}
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="sidebar-card">
+        <h6>Quick Actions</h6>
+        <div class="d-flex flex-column gap-2">
+          <a href="{{ url_for('attractions.list_attractions') }}" class="btn btn-blue btn-sm text-start"><i class="bi bi-building me-2"></i>Browse Attractions</a>
+          <a href="{{ url_for('guides.list_guides') }}" class="btn btn-blue btn-sm text-start"><i class="bi bi-person-badge me-2"></i>Book a Guide</a>
+          <a href="{{ url_for('hotels.list_hotels') }}" class="btn btn-outline-secondary btn-sm text-start"><i class="bi bi-building-fill me-2"></i>Find Hotels</a>
+          <a href="{{ url_for('restaurants.list_restaurants') }}" class="btn btn-outline-secondary btn-sm text-start"><i class="bi bi-cup-hot me-2"></i>Find Restaurants</a>
+          <a href="{{ url_for('events.list_events') }}" class="btn btn-outline-secondary btn-sm text-start"><i class="bi bi-calendar-event me-2"></i>Upcoming Events</a>
+          <a href="{{ url_for('dashboard.profile') }}" class="btn btn-outline-secondary btn-sm text-start"><i class="bi bi-person me-2"></i>Edit Profile</a>
+        </div>
+      </div>
+
+      <!-- Restaurant Owner Section -->
+      {% if current_user.role == 'Restaurant' %}
+      <div class="sidebar-card" style="border-left:4px solid #e05c27">
+        <h6 class="text-restaurant"><i class="bi bi-cup-hot me-2"></i>Restaurant Management</h6>
+        <div class="d-flex flex-column gap-2">
+          <a href="{{ url_for('admin.restaurants') }}" class="btn btn-outline-restaurant btn-sm text-start">
+            <i class="bi bi-list me-2"></i>My Restaurants
+          </a>
+          <a href="{{ url_for('admin.restaurant_create') }}" class="btn btn-restaurant btn-sm text-start">
+            <i class="bi bi-plus-circle me-2"></i>Add Restaurant
+          </a>
+          <a href="{{ url_for('admin.restaurants') }}" class="btn btn-outline-secondary btn-sm text-start">
+            <i class="bi bi-menu-app me-2"></i>Manage Menu
+          </a>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Guide Profile Section -->
+      {% if guide_profile %}
+      <div class="sidebar-card" style="border-left:4px solid var(--gold-500)">
+        <h6 class="text-gold">Guide Profile</h6>
+        <p class="small text-muted">Status: <span class="badge-{% if guide_profile.verification_status=='Approved' %}verified{% elif guide_profile.verification_status=='Pending' %}pending{% else %}rejected{% endif %}">{{ guide_profile.verification_status }}</span></p>
+        <p class="small text-muted mb-1">Rate: ₦{{ '{:,.0f}'.format(guide_profile.hourly_rate) }}/hr</p>
+        <p class="small text-muted mb-0">Specializations: {{ guide_profile.specializations or 'Not set' }}</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

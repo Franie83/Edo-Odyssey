@@ -1,0 +1,132 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Reviews – Admin{% endblock %}
+{% block page_title %}Reviews Moderation{% endblock %}
+{% block page_subtitle %}Manage and moderate user reviews{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 admin-table">
+        <thead class="bg-blue-100">
+          <tr>
+            <th class="px-3 py-2">Reviewer</th>
+            <th class="px-3 py-2">Target</th>
+            <th class="px-3 py-2">Rating</th>
+            <th class="px-3 py-2">Comment</th>
+            <th class="px-3 py-2 text-center">Approved</th>
+            <th class="px-3 py-2">Date</th>
+            <th class="px-3 py-2 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for review in reviews %}
+          <tr>
+            <td class="px-3 py-2">
+              <div>
+                <div class="fw-semibold small text-blue">{{ review.user.full_name if review.user else 'Unknown User' }}</div>
+                <div class="text-muted" style="font-size:0.65rem">{{ review.user.email if review.user else '' }}</div>
+              </div>
+            </td>
+            <td class="px-3 py-2">
+              <div>
+                <span class="badge bg-blue-100 text-blue" style="font-size:0.6rem">
+                  {{ review.target_type }}
+                </span>
+                <div class="fw-semibold small">{{ review.target_name }}</div>
+              </div>
+            </td>
+            <td class="px-3 py-2">
+              <div class="star-rating" style="font-size:0.8rem">
+                {% for i in range(5) %}
+                  {% if i < review.rating %}
+                    <i class="bi bi-star-fill text-gold"></i>
+                  {% else %}
+                    <i class="bi bi-star"></i>
+                  {% endif %}
+                {% endfor %}
+                <span class="ms-1 text-muted" style="font-size:0.7rem">{{ review.rating }}/5</span>
+              </div>
+            </td>
+            <td class="px-3 py-2">
+              <div class="small text-muted text-truncate" style="max-width:200px" title="{{ review.comment }}">
+                {{ review.comment|truncate(60) }}
+              </div>
+            </td>
+            <td class="px-3 py-2 text-center">
+              {% if review.is_approved %}
+              <span class="badge bg-success">Approved</span>
+              {% else %}
+              <span class="badge bg-warning text-dark">Pending</span>
+              {% endif %}
+            </td>
+            <td class="px-3 py-2">
+              <div class="small text-muted">
+                {{ review.created_at.strftime('%d %b %Y') }}
+                <div style="font-size:0.6rem">{{ review.created_at.strftime('%H:%M') }}</div>
+              </div>
+            </td>
+            <td class="px-3 py-2 text-center">
+              <div class="btn-group btn-group-sm">
+                <form method="POST" action="{{ url_for('admin.review_approve', id=review.id) }}" class="d-inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                  <button class="btn btn-outline-{% if review.is_approved %}warning{% else %}success{% endif %} btn-sm py-0" title="Toggle Approval">
+                    <i class="bi bi-{% if review.is_approved %}x-circle{% else %}check-circle{% endif %}"></i>
+                  </button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.review_delete', id=review.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this review?')">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                  <button class="btn btn-outline-danger btn-sm py-0" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="text-center py-4 text-muted">
+              <i class="bi bi-chat-square-text fs-2 d-block mb-2"></i>
+              No reviews found. Reviews will appear here once users submit them.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% if pagination and pagination.pages > 1 %}
+  <div class="card-footer bg-transparent py-2">
+    <div class="d-flex justify-content-between align-items-center">
+      <small class="text-muted">Showing {{ reviews|length }} review(s)</small>
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          {% if pagination.has_prev %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.reviews', page=pagination.prev_num) }}">&laquo;</a>
+          </li>
+          {% endif %}
+          {% for page_num in pagination.iter_pages() %}
+            {% if page_num %}
+              {% if page_num == pagination.page %}
+              <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+              {% else %}
+              <li class="page-item"><a class="page-link" href="{{ url_for('admin.reviews', page=page_num) }}">{{ page_num }}</a></li>
+              {% endif %}
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+          {% if pagination.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.reviews', page=pagination.next_num) }}">&raquo;</a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

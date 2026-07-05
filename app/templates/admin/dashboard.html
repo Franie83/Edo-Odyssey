@@ -1,0 +1,152 @@
+{% extends "admin/base.html" %}
+{% block title %}Admin Dashboard – Edo Odyssey{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Platform Overview{% endblock %}
+{% block content %}
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+  {% set stat_items = [
+    ('Users', stats.users, 'bi-people-fill', '#1a3a6b', '#e8f0fe'),
+    ('Attractions', stats.attractions, 'bi-building', '#c9a227', '#fdf6e3'),
+    ('Guides', stats.guides, 'bi-person-badge-fill', '#2d8a4e', '#e8f5e9'),
+    ('Hotels', stats.hotels, 'bi-building-fill', '#1a7abf', '#e3f2fd'),
+    ('Restaurants', stats.restaurants, 'bi-cup-hot-fill', '#e05c27', '#fde8e0'),
+    ('Bookings', stats.bookings, 'bi-calendar-check-fill', '#1a3a6b', '#e8f0fe'),
+    ('Pending', stats.pending_bookings, 'bi-clock-fill', '#c9a227', '#fdf6e3'),
+    ('Reviews', stats.reviews, 'bi-star-fill', '#8a2d8a', '#f3e5f5'),
+    ('QR Scans', stats.qr_scans, 'bi-qr-code-scan', '#0d2447', '#e8f0fe'),
+  ] %}
+  {% for label, val, icon, color, bg in stat_items %}
+  <div class="col-6 col-md-3">
+    <div class="admin-stat" style="border-left-color:{{ color }}">
+      <div class="admin-stat-icon" style="background:{{ bg }};color:{{ color }}"><i class="bi {{ icon }}"></i></div>
+      <div><div class="admin-stat-value" style="color:{{ color }}">{{ val }}</div><div class="admin-stat-label">{{ label }}</div></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-bar-chart-line me-2 text-gold"></i>Booking Trend (Last 6 Months)</h6></div>
+      <div class="card-body"><canvas id="bookingChart" height="120"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-trophy me-2 text-gold"></i>Top Attractions</h6></div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for a in top_attractions %}
+          <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+            <div class="small fw-semibold text-blue text-truncate" style="max-width:170px">{{ a.name }}</div>
+            <div class="d-flex gap-1 align-items-center"><i class="bi bi-eye text-muted" style="font-size:.7rem"></i><span class="badge bg-blue-100 text-blue" style="font-size:.7rem">{{ a.views }}</span></div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Bookings + Users + Logs -->
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold text-blue mb-0"><i class="bi bi-calendar-check me-2 text-gold"></i>Recent Bookings</h6>
+        <a href="{{ url_for('admin.bookings') }}" class="btn btn-blue btn-sm py-0">All</a>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0 admin-table">
+          <thead><tr><th>Ref</th><th>User</th><th>Type</th><th>Status</th><th>Amount</th></tr></thead>
+          <tbody>
+          {% for b in recent_bookings %}
+          <tr>
+            <td><code class="text-blue" style="font-size:.75rem">{{ b.reference_code }}</code></td>
+            <td class="small">{{ b.user.full_name if b.user else '—' }}</td>
+            <td><span class="badge bg-blue-100 text-blue" style="font-size:.65rem">{{ b.booking_type }}</span></td>
+            <td><span class="status-badge {% if b.booking_status=='Confirmed' %}bg-success text-white{% elif b.booking_status=='Pending' %}bg-warning text-dark{% elif b.booking_status=='Cancelled' %}bg-danger text-white{% else %}bg-secondary text-white{% endif %}">{{ b.booking_status }}</span></td>
+            <td class="fw-semibold text-gold small">₦{{ '{:,.0f}'.format(b.total_price) }}</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold text-blue mb-0"><i class="bi bi-person-plus me-2 text-gold"></i>Recent Users</h6>
+        <a href="{{ url_for('admin.users') }}" class="btn btn-blue btn-sm py-0">All</a>
+      </div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for u in recent_users %}
+          <li class="list-group-item d-flex align-items-center gap-2 py-2">
+            <div class="avatar-initials-sm flex-shrink-0">{{ u.first_name[0] }}{{ u.last_name[0] }}</div>
+            <div><div class="small fw-semibold">{{ u.full_name }}</div><div class="text-muted" style="font-size:.7rem">{{ u.email }} · {{ u.role }}</div></div>
+            <span class="badge ms-auto {% if u.is_verified %}bg-success{% else %}bg-warning text-dark{% endif %}" style="font-size:.65rem">{% if u.is_verified %}Verified{% else %}Pending{% endif %}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Broadcast Notification -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-broadcast me-2 text-gold"></i>Broadcast Notification</h6></div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('admin.notify_all') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="text" name="title" class="form-control form-control-sm mb-2" placeholder="Notification title" required>
+          <textarea name="message" class="form-control form-control-sm mb-2" rows="2" placeholder="Message to all users…" required></textarea>
+          <button type="submit" class="btn btn-gold btn-sm w-100"><i class="bi bi-send me-1"></i>Send to All Users</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Audit Logs -->
+<div class="card border-0 shadow-sm mt-4">
+  <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-journal-text me-2 text-gold"></i>Recent Audit Logs</h6><a href="{{ url_for('admin.audit_logs') }}" class="btn btn-blue btn-sm py-0">All Logs</a></div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0 admin-table">
+      <thead><tr><th>Time</th><th>User</th><th>Role</th><th>Action</th><th>IP</th></tr></thead>
+      <tbody>
+      {% for log in recent_logs %}
+      <tr><td class="small text-muted">{{ log.created_at.strftime('%d %b %H:%M') }}</td><td class="small">{{ log.operator_email }}</td><td><span class="badge bg-blue-100 text-blue" style="font-size:.65rem">{{ log.role }}</span></td><td class="small">{{ log.action[:60] }}</td><td class="small text-muted">{{ log.ip_address }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const trendData = {{ trend_data | safe }};
+new Chart(document.getElementById('bookingChart'), {
+  type: 'bar',
+  data: {
+    labels: trendData.map(d => d.month),
+    datasets: [{
+      label: 'Bookings',
+      data: trendData.map(d => d.count),
+      backgroundColor: 'rgba(26,58,107,0.7)',
+      borderColor: '#1a3a6b',
+      borderWidth: 1,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+  }
+});
+</script>
+{% endblock %}

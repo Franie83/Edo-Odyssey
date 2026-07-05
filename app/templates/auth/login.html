@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – Edo Odyssey</title>
+  <meta name="description" content="Explore Edo State's world-class cultural heritage, wildlife, and tourism experiences through the official Edo Odyssey digital platform.">
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/main.css">
+  
+</head>
+<body>
+
+<!-- TOP BANNER -->
+<div class="top-banner py-1 d-none d-md-block">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div class="d-flex gap-3 small">
+      <span><i class="bi bi-telephone-fill me-1"></i>+234 (0) 52 255 000</span>
+      <span><i class="bi bi-envelope-fill me-1"></i>info@edsta.edo.gov.ng</span>
+    </div>
+    <div class="d-flex gap-2 small">
+      <a href="#" class="text-gold"><i class="bi bi-facebook"></i></a>
+      <a href="#" class="text-gold"><i class="bi bi-twitter-x"></i></a>
+      <a href="#" class="text-gold"><i class="bi bi-instagram"></i></a>
+      <a href="#" class="text-gold"><i class="bi bi-youtube"></i></a>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark main-navbar sticky-top">
+  <div class="container">
+    <!-- Brand -->
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+      <div class="brand-icon"><i class="bi bi-compass-fill"></i></div>
+      <div>
+        <div class="brand-title">EDO ODYSSEY</div>
+        <div class="brand-subtitle">Official Tourism Platform</div>
+      </div>
+    </a>
+
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav mx-auto gap-1">
+        <li class="nav-item"><a class="nav-link " href="/">Home</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Explore</a>
+          <ul class="dropdown-menu mega-dropdown">
+            <li><a class="dropdown-item" href="/attractions/"><i class="bi bi-building me-2 text-primary"></i>Attractions</a></li>
+            <li><a class="dropdown-item" href="/guides/"><i class="bi bi-person-badge me-2 text-primary"></i>Tour Guides</a></li>
+            <li><a class="dropdown-item" href="/hotels/"><i class="bi bi-building-fill me-2 text-primary"></i>Hotels</a></li>
+            <li><a class="dropdown-item" href="/restaurants/"><i class="bi bi-cup-hot me-2 text-primary"></i>Restaurants</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link " href="/events/">Events</a></li>
+        <li class="nav-item"><a class="nav-link " href="/news/">News</a></li>
+        <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+      </ul>
+
+      <!-- Search -->
+      <form class="d-flex me-3 search-form" action="/search/" method="get">
+        <div class="input-group input-group-sm">
+          <input class="form-control nav-search" type="search" name="q" placeholder="Search Edo…" value="">
+          <button class="btn btn-gold btn-sm" type="submit"><i class="bi bi-search"></i></button>
+        </div>
+      </form>
+
+      <!-- User menu -->
+      
+      <div class="d-flex gap-2">
+        <a href="/auth/login" class="btn btn-outline-gold btn-sm">Login</a>
+        <a href="/auth/register" class="btn btn-gold btn-sm">Register</a>
+      </div>
+      
+    </div>
+  </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+
+
+<div class="container mt-2" id="flash-container">
+  
+  
+  
+  
+  
+</div>
+
+
+
+<!-- PAGE CONTENT -->
+
+<div class="min-vh-100 d-flex align-items-center" style="background:linear-gradient(135deg,var(--blue-900) 0%,var(--blue-700) 100%)">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-5 col-lg-4">
+        <div class="text-center mb-4">
+          <div class="brand-icon mx-auto mb-3" style="width:56px;height:56px;font-size:1.6rem"><i class="bi bi-compass-fill"></i></div>
+          <h2 class="text-white fw-bold" style="font-family:'Playfair Display',serif">Welcome Back</h2>
+          <p class="text-white-50 small">Sign in to your Edo Odyssey account</p>
+        </div>
+        <div class="card border-0 shadow-lg" style="border-radius:16px">
+          <div class="card-body p-4">
+            <form method="POST" action="/auth/login">
+              
+              <input type="hidden" name="csrf_token" value="IjZlZjY3YWIyMzA1ZmEzMTAxODdkZDkwNTY0OTdmZDk4MTNhZDQxYmMi.akp6WQ.TmIwlRyaorsUDh8EYUxfJQhnOn0">
+              
+              <div class="mb-3">
+                <label class="form-label fw-semibold small">Email Address</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-blue-100 border-0"><i class="bi bi-envelope text-blue"></i></span>
+                  <input type="email" name="email" class="form-control border-0 bg-blue-100" placeholder="your@email.com" required="" autofocus="">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold small">Password</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-blue-100 border-0"><i class="bi bi-lock text-blue"></i></span>
+                  <input type="password" name="password" id="pwd" class="form-control border-0 bg-blue-100" placeholder="••••••••" required="">
+                  <button class="btn bg-blue-100 border-0" type="button" onclick="togglePwd()"><i class="bi bi-eye" id="eyeIcon"></i></button>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                  <label class="form-check-label small" for="remember">Remember me</label>
+                </div>
+                <a href="#" class="small text-blue">Forgot password?</a>
+              </div>
+              <button type="submit" class="btn btn-blue w-100 fw-semibold py-2">Sign In <i class="bi bi-arrow-right ms-1"></i></button>
+            </form>
+            <hr class="my-3">
+            <p class="text-center small text-muted mb-2 fw-semibold">Quick Demo Access</p>
+            <div class="d-flex flex-column gap-1">
+              <a href="/auth/quick-login/superadmin" class="btn btn-gold btn-sm"><i class="bi bi-shield-star me-1"></i>Super Admin</a>
+              <a href="/auth/quick-login/admin" class="btn btn-outline-secondary btn-sm"><i class="bi bi-shield-check me-1"></i>Agency Admin</a>
+              <div class="row g-1">
+                <div class="col-4"><a href="/auth/quick-login/tourist" class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-person me-1"></i>Tourist</a></div>
+                <div class="col-4"><a href="/auth/quick-login/guide" class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-person-badge me-1"></i>Guide</a></div>
+                <div class="col-4"><a href="/auth/quick-login/hotel" class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-building me-1"></i>Hotel</a></div>
+              </div>
+              <!-- Restaurant quick login added below -->
+              <a href="/auth/quick-login/restaurant" class="btn btn-outline-secondary btn-sm w-100 mt-1"><i class="bi bi-cup-hot me-1"></i>Restaurant</a>
+            </div>
+          </div>
+          <div class="card-footer bg-gray-50 text-center py-3" style="border-radius:0 0 16px 16px">
+            <small>Don't have an account? <a href="/auth/register" class="text-blue fw-semibold">Register here</a></small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function togglePwd(){
+  const p=document.getElementById('pwd'),i=document.getElementById('eyeIcon');
+  p.type=p.type==='password'?'text':'password';
+  i.className=p.type==='password'?'bi bi-eye':'bi bi-eye-slash';
+}
+</script>
+
+
+<!-- FOOTER -->
+<footer class="site-footer mt-5">
+  <div class="footer-top py-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="brand-icon"><i class="bi bi-compass-fill"></i></div>
+            <div>
+              <div class="brand-title text-white">EDO ODYSSEY</div>
+              <div class="brand-subtitle" style="font-size:0.65rem">Official Tourism Platform</div>
+            </div>
+          </div>
+          <p class="text-white-50 small">The Edo State Tourism Agency (EDSTA) is a statutory public corporation established to guide, preserve, license, and promote the natural landmarks, cultural festivals, and historical heritage monuments …</p>
+          <div class="d-flex gap-3 mt-3">
+            <a href="#" class="text-gold fs-5"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="text-gold fs-5"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" class="text-gold fs-5"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="text-gold fs-5"><i class="bi bi-youtube"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-6">
+          <h6 class="text-gold fw-bold mb-3 text-uppercase letter-spacing">Explore</h6>
+          <ul class="list-unstyled footer-links">
+            <li><a href="/attractions/">Attractions</a></li>
+            <li><a href="/guides/">Tour Guides</a></li>
+            <li><a href="/hotels/">Hotels</a></li>
+            <li><a href="/restaurants/">Restaurants</a></li>
+            <li><a href="/events/">Events</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-6">
+          <h6 class="text-gold fw-bold mb-3 text-uppercase letter-spacing">EDSTA</h6>
+          <ul class="list-unstyled footer-links">
+            <li><a href="/about">About EDSTA</a></li>
+            <li><a href="/news/">Tourism News</a></li>
+            <li><a href="/faq">FAQs</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/privacy">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-gold fw-bold mb-3 text-uppercase letter-spacing">Quick Login (Demo)</h6>
+          <div class="d-flex flex-wrap gap-1 mb-3">
+            <a href="/auth/quick-login/admin" class="btn btn-outline-gold btn-sm"><i class="bi bi-shield-fill me-1"></i>Admin</a>
+            <a href="/auth/quick-login/tourist" class="btn btn-outline-light btn-sm"><i class="bi bi-person me-1"></i>Tourist</a>
+            <a href="/auth/quick-login/guide" class="btn btn-outline-light btn-sm"><i class="bi bi-person-badge me-1"></i>Guide</a>
+            <a href="/auth/quick-login/hotel" class="btn btn-outline-light btn-sm"><i class="bi bi-building me-1"></i>Hotel</a>
+            <a href="/auth/quick-login/restaurant" class="btn btn-outline-light btn-sm"><i class="bi bi-cup-hot me-1"></i>Restaurant</a>
+          </div>
+          <h6 class="text-gold fw-bold mb-2 text-uppercase letter-spacing" style="font-size:0.7rem">Contact</h6>
+          <p class="text-white-50 small mb-1"><i class="bi bi-geo-alt me-1"></i>EDSTA Headquarters, Government House Road, GRA, Benin City, Edo State, Nigeria</p>
+          <p class="text-white-50 small mb-1"><i class="bi bi-telephone me-1"></i>+234 (0) 52 255 000</p>
+          <p class="text-white-50 small"><i class="bi bi-envelope me-1"></i>info@edsta.edo.gov.ng</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom py-2 text-center">
+    <small class="text-white-50">© 2026 Edo State Tourism Agency (EDSTA). All rights reserved.</small>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/main.js"></script>
+
+
+</body></html>

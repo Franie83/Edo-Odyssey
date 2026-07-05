@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ guide.user.full_name }} – Guide – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item"><a href="{{ url_for('guides.list_guides') }}">Guides</a></li><li class="breadcrumb-item active">{{ guide.user.full_name if guide.user else 'Guide' }}</li></ol></nav><h1>{{ guide.user.full_name if guide.user else 'Guide' }}</h1></div></div>
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm p-4">
+        <div class="d-flex gap-4 align-items-start">
+          {% if guide.photo_url %}<img src="{{ guide.photo_url }}" class="guide-avatar" width="90" height="90">{% else %}<div class="guide-avatar-placeholder" style="width:90px;height:90px;font-size:2.5rem"><i class="bi bi-person-fill"></i></div>{% endif %}
+          <div>
+            <h3 class="fw-bold text-blue">{{ guide.user.full_name if guide.user else 'Guide' }}</h3>
+            <div class="star-rating mb-2">{% for i in range(1,6) %}<i class="bi bi-star{% if i <= guide.avg_rating %}-fill{% endif %}"></i>{% endfor %} <span class="text-muted">({{ guide.avg_rating }}/5)</span></div>
+            <span class="badge-verified me-2"><i class="bi bi-patch-check me-1"></i>{{ guide.verification_status }}</span>
+            <span class="badge bg-blue-100 text-blue">License #{{ guide.license_number or 'N/A' }}</span>
+          </div>
+        </div>
+        <hr>
+        <h5 class="fw-bold text-blue">About</h5>
+        <p class="text-muted lh-lg">{{ guide.bio or 'Certified Edo State Tour Guide.' }}</p>
+        {% if guide.specializations %}<p><strong>Specializations:</strong> {{ guide.specializations }}</p>{% endif %}
+        {% if guide.certifications %}<p><strong>Certifications:</strong> {{ guide.certifications }}</p>{% endif %}
+        <div class="row g-3 mt-2">
+          <div class="col-md-4 text-center"><div class="fw-bold text-blue fs-4">{{ guide.experience }}</div><div class="text-muted small">Years Experience</div></div>
+          <div class="col-md-4 text-center"><div class="fw-bold text-gold fs-4">₦{{ '{:,.0f}'.format(guide.hourly_rate) }}</div><div class="text-muted small">Per Hour</div></div>
+          <div class="col-md-4 text-center"><div class="fw-bold text-blue fs-4">₦{{ '{:,.0f}'.format(guide.daily_rate) }}</div><div class="text-muted small">Per Day</div></div>
+        </div>
+        <hr>
+        <h5 class="fw-bold text-blue">Languages</h5>
+        <div class="d-flex flex-wrap gap-2">{% for l in guide.languages_list %}<span class="lang-badge">{{ l }}</span>{% endfor %}</div>
+        <hr>
+        <h5 class="fw-bold text-blue">Reviews ({{ reviews|length }})</h5>
+        {% for r in reviews %}<div class="review-card mb-3"><div class="d-flex justify-content-between mb-1"><div class="fw-semibold small">{{ r.user.full_name if r.user else 'Visitor' }}</div><div class="star-rating">{% for i in range(1,6) %}<i class="bi bi-star{% if i <= r.rating %}-fill{% endif %}"></i>{% endfor %}</div></div><p class="small text-muted mb-0">{{ r.comment }}</p></div>{% endfor %}
+        {% if current_user.is_authenticated %}
+        <div class="bg-blue-100 p-3 rounded-3 mt-3">
+          <h6 class="fw-bold">Leave a Review</h6>
+          <form method="POST" action="{{ url_for('reviews.add_review', target_type='Guide', target_id=guide.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="redirect_url" value="{{ request.url }}">
+            <div class="star-select d-flex gap-1 mb-2" style="font-size:1.4rem;cursor:pointer"><input type="hidden" name="rating" value="5">{% for i in range(1,6) %}<i class="bi bi-star-fill text-gold" data-star="{{ i }}"></i>{% endfor %}</div>
+            <textarea name="comment" class="form-control border-0 mb-2" rows="2" required placeholder="How was your experience?"></textarea>
+            <button type="submit" class="btn btn-blue btn-sm">Submit</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="sidebar-card">
+        <h6>Book This Guide</h6>
+        <div class="mb-3"><div class="fw-bold text-gold fs-5">₦{{ '{:,.0f}'.format(guide.hourly_rate) }}<span class="text-muted small fw-normal">/hr</span></div><div class="fw-bold text-blue">₦{{ '{:,.0f}'.format(guide.daily_rate) }}<span class="text-muted small fw-normal">/day</span></div></div>
+        <p class="text-muted small">Availability: <span class="fw-semibold text-success">{{ guide.availability }}</span></p>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('bookings.new_booking', booking_type='Guide', target_id=guide.id) }}" class="btn btn-gold w-100 fw-semibold"><i class="bi bi-calendar-plus me-2"></i>Book Now</a>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-blue w-100">Login to Book</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

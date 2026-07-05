@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ title }} – Admin{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="col-lg-8">
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3">
+          <div class="col-12"><label class="form-label fw-semibold small">Name *</label><input type="text" name="name" class="form-control" value="{{ hotel.name if hotel else '' }}" required></div>
+          <div class="col-12"><label class="form-label fw-semibold small">Address *</label><input type="text" name="address" class="form-control" value="{{ hotel.address if hotel else '' }}" required></div>
+          <div class="col-12"><label class="form-label fw-semibold small">Description *</label><textarea name="description" class="form-control" rows="4" required>{{ hotel.description if hotel else '' }}</textarea></div>
+          <div class="col-12"><label class="form-label fw-semibold small">Facilities (comma-separated)</label><input type="text" name="facilities" class="form-control" value="{{ hotel.facilities if hotel else '' }}" placeholder="Pool, WiFi, Gym, Restaurant"></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Price/Night (₦) *</label><input type="number" name="price_per_night" class="form-control" value="{{ hotel.price_per_night if hotel else 0 }}" min="0" step="0.01" required></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Stars</label><select name="stars" class="form-select">{% for s in range(1,6) %}<option value="{{ s }}" {% if hotel and hotel.stars==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Total Rooms</label><input type="number" name="total_rooms" class="form-control" value="{{ hotel.total_rooms if hotel else 0 }}" min="0"></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">Latitude *</label><input type="number" name="latitude" step="any" class="form-control" value="{{ hotel.latitude if hotel else 6.34 }}" required></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">Longitude *</label><input type="number" name="longitude" step="any" class="form-control" value="{{ hotel.longitude if hotel else 5.62 }}" required></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">Contact</label><input type="text" name="contact" class="form-control" value="{{ hotel.contact if hotel else '' }}"></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">Website</label><input type="url" name="website" class="form-control" value="{{ hotel.website if hotel else '' }}" placeholder="https://…"></div>
+          <div class="col-12"><label class="form-label fw-semibold small">Image URL (or upload)</label><input type="url" name="image_url" class="form-control mb-1" value="{{ hotel.image_url if hotel else '' }}" placeholder="https://…"><input type="file" name="image" class="form-control" accept="image/*"></div>
+          <div class="col-12"><div class="form-check form-switch"><input type="checkbox" name="featured" class="form-check-input" id="featSw" {% if hotel and hotel.featured %}checked{% endif %}><label class="form-check-label" for="featSw">Featured</label></div></div>
+        </div>
+        <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-gold px-4">Save Hotel</button><a href="{{ url_for('admin.hotels') }}" class="btn btn-outline-secondary">Cancel</a></div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

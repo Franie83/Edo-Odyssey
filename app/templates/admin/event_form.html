@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ title }} – Admin{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="col-lg-8">
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3">
+          <div class="col-12"><label class="form-label fw-semibold small">Event Name *</label><input type="text" name="name" class="form-control" value="{{ event.name if event else '' }}" required></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">Start Date *</label><input type="datetime-local" name="date" class="form-control" value="{{ event.date.strftime('%Y-%m-%dT%H:%M') if event else '' }}" required></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">End Date</label><input type="datetime-local" name="end_date" class="form-control" value="{{ event.end_date.strftime('%Y-%m-%dT%H:%M') if event and event.end_date else '' }}"></div>
+          <div class="col-12"><label class="form-label fw-semibold small">Location *</label><input type="text" name="location" class="form-control" value="{{ event.location if event else '' }}" required></div>
+          <div class="col-12"><label class="form-label fw-semibold small">Description *</label><textarea name="description" class="form-control" rows="4" required>{{ event.description if event else '' }}</textarea></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Ticket Price (₦)</label><input type="number" name="ticket_price" class="form-control" value="{{ event.ticket_price if event else 0 }}" min="0" step="0.01"></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Capacity</label><input type="number" name="capacity" class="form-control" value="{{ event.capacity if event else 0 }}" min="0"></div>
+          <div class="col-md-4"><label class="form-label fw-semibold small">Category</label><input type="text" name="category" class="form-control" value="{{ event.category if event else '' }}" placeholder="Cultural Festival"></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">Organiser</label><input type="text" name="organizer" class="form-control" value="{{ event.organizer if event else '' }}"></div>
+          <div class="col-md-6"><label class="form-label fw-semibold small">Contact</label><input type="text" name="contact" class="form-control" value="{{ event.contact if event else '' }}"></div>
+          <div class="col-12"><label class="form-label fw-semibold small">Image URL (or upload)</label><input type="url" name="image_url" class="form-control mb-1" value="{{ event.image_url if event else '' }}" placeholder="https://…"><input type="file" name="image" class="form-control" accept="image/*"></div>
+          <div class="col-12 d-flex gap-4">
+            <div class="form-check form-switch"><input type="checkbox" name="featured" class="form-check-input" id="featSw" {% if event and event.featured %}checked{% endif %}><label class="form-check-label" for="featSw">Featured</label></div>
+            <div class="form-check form-switch"><input type="checkbox" name="active" class="form-check-input" id="activeSw" {% if not event or event.active %}checked{% endif %}><label class="form-check-label" for="activeSw">Active</label></div>
+          </div>
+        </div>
+        <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-gold px-4">Save Event</button><a href="{{ url_for('admin.events') }}" class="btn btn-outline-secondary">Cancel</a></div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

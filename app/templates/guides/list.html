@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Tour Guides – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item active">Guides</li></ol></nav>
+    <h1 class="mb-1"><i class="bi bi-person-badge me-2 text-gold"></i>Certified Tour Guides</h1>
+    <p class="text-white-50">Connect with ESTA-certified local experts who bring Edo's history to life</p>
+  </div>
+</div>
+<div class="container py-4">
+  <form method="GET" class="filter-bar mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-4"><input type="text" name="q" class="form-control" placeholder="Search guides…" value="{{ search_q }}"></div>
+      <div class="col-md-3"><input type="text" name="language" class="form-control" placeholder="Language (e.g. French)" value="{{ selected_lang }}"></div>
+      <div class="col-md-3">
+        <select name="sort" class="form-select">
+          <option value="experience" {% if sort=='experience' %}selected{% endif %}>Most Experienced</option>
+          <option value="rate_asc" {% if sort=='rate_asc' %}selected{% endif %}>Rate: Low to High</option>
+          <option value="rate_desc" {% if sort=='rate_desc' %}selected{% endif %}>Rate: High to Low</option>
+        </select>
+      </div>
+      <div class="col-md-2"><button type="submit" class="btn btn-blue w-100"><i class="bi bi-search"></i></button></div>
+    </div>
+  </form>
+
+  {% if guides %}
+  <div class="row g-4">
+    {% for g in guides %}
+    <div class="col-md-6 col-lg-4">
+      <div class="guide-card card h-100">
+        <div class="card-body text-center p-4">
+          {% if g.photo_url %}
+          <img src="{{ g.photo_url }}" class="guide-avatar mb-3" alt="{{ g.user.full_name }}">
+          {% else %}
+          <div class="guide-avatar-placeholder mx-auto mb-3"><i class="bi bi-person-fill"></i></div>
+          {% endif %}
+          <h5 class="fw-bold text-blue mb-1">{{ g.user.full_name if g.user else 'Guide' }}</h5>
+          <div class="star-rating mb-1">{% for i in range(1,6) %}<i class="bi bi-star{% if i <= g.avg_rating %}-fill{% endif %}"></i>{% endfor %} <span class="text-muted small">({{ g.avg_rating }})</span></div>
+          <span class="badge-verified mb-2 d-inline-block"><i class="bi bi-patch-check me-1"></i>{{ g.verification_status }}</span>
+          <p class="text-muted small mb-2 text-truncate-2">{{ g.bio or 'Certified Edo State Tour Guide' }}</p>
+          {% if g.specializations %}<p class="text-blue small mb-2"><i class="bi bi-star me-1 text-gold"></i>{{ g.specializations }}</p>{% endif %}
+          <div class="d-flex flex-wrap justify-content-center gap-1 mb-3">
+            {% for lang in g.languages_list[:4] %}<span class="lang-badge">{{ lang }}</span>{% endfor %}
+          </div>
+          <div class="border-top pt-3">
+            <div class="row text-center g-2">
+              <div class="col-4"><div class="fw-bold text-blue">{{ g.experience }}</div><div class="text-muted" style="font-size:.7rem">Years Exp.</div></div>
+              <div class="col-4"><div class="fw-bold text-gold">₦{{ '{:,.0f}'.format(g.hourly_rate) }}</div><div class="text-muted" style="font-size:.7rem">Per Hour</div></div>
+              <div class="col-4"><div class="fw-bold text-blue">{{ g.total_tours }}</div><div class="text-muted" style="font-size:.7rem">Tours Done</div></div>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <a href="{{ url_for('guides.detail', id=g.id) }}" class="btn btn-outline-secondary btn-sm flex-grow-1">View Profile</a>
+            <a href="{{ url_for('bookings.new_booking', booking_type='Guide', target_id=g.id) }}" class="btn btn-gold btn-sm flex-grow-1">Book Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% if pagination.pages > 1 %}
+  <nav class="mt-4 d-flex justify-content-center">
+    <ul class="pagination">
+      {% for p in pagination.iter_pages() %}{% if p %}<li class="page-item {% if p==pagination.page %}active{% endif %}"><a class="page-link" href="?page={{ p }}&q={{ search_q }}&language={{ selected_lang }}&sort={{ sort }}">{{ p }}</a></li>{% endif %}{% endfor %}
+    </ul>
+  </nav>
+  {% endif %}
+  {% else %}
+  <div class="text-center py-5"><i class="bi bi-person-x text-muted" style="font-size:4rem"></i><h4 class="text-muted mt-3">No guides found</h4><a href="{{ url_for('guides.list_guides') }}" class="btn btn-blue mt-2">Clear Filters</a></div>
+  {% endif %}
+</div>
+{% endblock %}

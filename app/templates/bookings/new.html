@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Book {{ booking_type }} – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><h1><i class="bi bi-calendar-plus me-2 text-gold"></i>Book {{ booking_type }}</h1></div></div>
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          {% if target %}
+          <div class="d-flex gap-3 align-items-center mb-4 p-3 bg-blue-100 rounded-3">
+            {% if target.image_url %}<img src="{{ target.image_url }}" width="60" height="60" style="object-fit:cover;border-radius:8px" alt="">{% endif %}
+            <div>
+              <div class="fw-bold text-blue">{{ target.name if booking_type != 'Guide' else (target.user.full_name if target.user else 'Guide') }}</div>
+              <div class="text-muted small">{{ booking_type }} Booking</div>
+              {% if booking_type == 'Hotel' %}<div class="text-gold fw-semibold">₦{{ '{:,.0f}'.format(target.price_per_night) }}/night</div>
+              {% elif booking_type == 'Guide' %}<div class="text-gold fw-semibold">₦{{ '{:,.0f}'.format(target.daily_rate) }}/day</div>
+              {% elif booking_type == 'Tour' or booking_type == 'Event' %}<div class="text-gold fw-semibold">₦{{ '{:,.0f}'.format(target.ticket_price) }}/person</div>{% endif %}
+            </div>
+          </div>
+          {% endif %}
+          <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Start Date <span class="text-danger">*</span></label>
+                <input type="date" name="start_date" class="form-control" required min="{{ now.strftime('%Y-%m-%d') if now else '' }}">
+              </div>
+              {% if booking_type in ['Hotel', 'Guide'] %}
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">End Date</label>
+                <input type="date" name="end_date" class="form-control">
+              </div>
+              {% endif %}
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Number of Guests</label>
+                <input type="number" name="num_guests" class="form-control" value="1" min="1" max="20">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Special Requests / Notes</label>
+                <textarea name="notes" class="form-control" rows="3" placeholder="Any special requirements, dietary needs, etc."></textarea>
+              </div>
+            </div>
+            <div class="mt-4 d-flex gap-2">
+              <button type="submit" class="btn btn-gold px-4 fw-semibold"><i class="bi bi-calendar-check me-2"></i>Confirm Booking</button>
+              <a href="javascript:history.back()" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

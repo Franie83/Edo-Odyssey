@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Search: {{ q }} – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><h1><i class="bi bi-search me-2 text-gold"></i>Search Results{% if q %}: "{{ q }}"{% endif %}</h1><p class="text-white-50">{{ total }} result{% if total != 1 %}s{% endif %} found</p></div></div>
+<div class="container py-4">
+  <form class="filter-bar mb-4" action="{{ url_for('search.results') }}" method="get">
+    <div class="row g-2">
+      <div class="col-md-9"><input type="text" name="q" class="form-control form-control-lg" value="{{ q }}" placeholder="Search attractions, hotels, guides, events, news…"></div>
+      <div class="col-md-3"><button type="submit" class="btn btn-blue w-100 btn-lg"><i class="bi bi-search me-1"></i>Search</button></div>
+    </div>
+  </form>
+  {% if not q %}
+  <div class="text-center py-5"><i class="bi bi-search text-muted" style="font-size:4rem"></i><h4 class="text-muted mt-3">Enter a search term above</h4></div>
+  {% elif total == 0 %}
+  <div class="text-center py-5"><i class="bi bi-emoji-frown text-muted" style="font-size:4rem"></i><h4 class="text-muted mt-3">No results for "{{ q }}"</h4><p class="text-muted">Try broader terms or browse our categories:</p><div class="d-flex gap-2 justify-content-center mt-3"><a href="{{ url_for('attractions.list_attractions') }}" class="btn btn-blue btn-sm">Attractions</a><a href="{{ url_for('guides.list_guides') }}" class="btn btn-outline-secondary btn-sm">Guides</a><a href="{{ url_for('hotels.list_hotels') }}" class="btn btn-outline-secondary btn-sm">Hotels</a></div></div>
+  {% else %}
+  {% if results.attractions %}
+  <h4 class="fw-bold text-blue mb-3"><i class="bi bi-building me-2 text-gold"></i>Attractions ({{ results.attractions|length }})</h4>
+  <div class="row g-3 mb-4">{% for a in results.attractions %}<div class="col-md-6 col-lg-4"><div class="card border-0 shadow-sm h-100"><div class="row g-0"><div class="col-4"><img src="{{ a.image_url or 'https://placehold.co/200x150/1a3a6b/c9a227?text=A' }}" class="w-100 h-100 object-fit-cover rounded-start" style="min-height:90px"></div><div class="col-8 p-2"><div class="fw-semibold small text-blue">{{ a.name }}</div><div class="text-muted" style="font-size:.7rem">{{ a.address[:50] }}</div><a href="{{ url_for('attractions.detail', id=a.id) }}" class="btn btn-blue btn-sm mt-1 py-0">View</a></div></div></div></div>{% endfor %}</div>
+  {% endif %}
+  {% if results.hotels %}
+  <h4 class="fw-bold text-blue mb-3"><i class="bi bi-building-fill me-2 text-gold"></i>Hotels ({{ results.hotels|length }})</h4>
+  <div class="row g-3 mb-4">{% for h in results.hotels %}<div class="col-md-6 col-lg-4"><div class="card border-0 shadow-sm h-100"><div class="row g-0"><div class="col-4"><img src="{{ h.image_url or 'https://placehold.co/200x150/1a3a6b/ffffff?text=H' }}" class="w-100 h-100 object-fit-cover rounded-start" style="min-height:90px"></div><div class="col-8 p-2"><div class="fw-semibold small text-blue">{{ h.name }}</div><div class="text-gold" style="font-size:.7rem">₦{{ '{:,.0f}'.format(h.price_per_night) }}/night</div><a href="{{ url_for('hotels.detail', id=h.id) }}" class="btn btn-blue btn-sm mt-1 py-0">View</a></div></div></div></div>{% endfor %}</div>
+  {% endif %}
+  {% if results.guides %}
+  <h4 class="fw-bold text-blue mb-3"><i class="bi bi-person-badge me-2 text-gold"></i>Guides ({{ results.guides|length }})</h4>
+  <div class="row g-3 mb-4">{% for g in results.guides %}<div class="col-md-6 col-lg-4"><div class="card border-0 shadow-sm p-3 d-flex flex-row align-items-center gap-3"><div class="guide-avatar-placeholder flex-shrink-0" style="width:50px;height:50px;font-size:1.2rem"><i class="bi bi-person-fill"></i></div><div><div class="fw-semibold small text-blue">{{ g.user.full_name if g.user else 'Guide' }}</div><div class="text-muted" style="font-size:.7rem">₦{{ '{:,.0f}'.format(g.hourly_rate) }}/hr · {{ g.experience }} yrs</div><a href="{{ url_for('guides.detail', id=g.id) }}" class="btn btn-blue btn-sm py-0 mt-1">View</a></div></div></div>{% endfor %}</div>
+  {% endif %}
+  {% if results.restaurants %}
+  <h4 class="fw-bold text-blue mb-3"><i class="bi bi-cup-hot me-2 text-gold"></i>Restaurants ({{ results.restaurants|length }})</h4>
+  <div class="row g-3 mb-4">{% for r in results.restaurants %}<div class="col-md-6 col-lg-4"><div class="card border-0 shadow-sm p-3"><div class="fw-semibold text-blue">{{ r.name }}</div><div class="text-muted small">{{ r.cuisine }}</div><a href="{{ url_for('restaurants.detail', id=r.id) }}" class="btn btn-blue btn-sm mt-1 py-0">View</a></div></div>{% endfor %}</div>
+  {% endif %}
+  {% if results.events %}
+  <h4 class="fw-bold text-blue mb-3"><i class="bi bi-calendar-event me-2 text-gold"></i>Events ({{ results.events|length }})</h4>
+  <div class="row g-3 mb-4">{% for e in results.events %}<div class="col-md-6 col-lg-4"><div class="card border-0 shadow-sm p-3"><div class="fw-semibold text-blue">{{ e.name }}</div><div class="text-muted small">{{ e.date.strftime('%d %b %Y') }} · {{ e.location }}</div><a href="{{ url_for('events.detail', id=e.id) }}" class="btn btn-blue btn-sm mt-1 py-0">View</a></div></div>{% endfor %}</div>
+  {% endif %}
+  {% if results.news %}
+  <h4 class="fw-bold text-blue mb-3"><i class="bi bi-newspaper me-2 text-gold"></i>News ({{ results.news|length }})</h4>
+  <div class="row g-3 mb-4">{% for n in results.news %}<div class="col-md-6 col-lg-4"><div class="card border-0 shadow-sm p-3"><div class="fw-semibold text-blue">{{ n.title }}</div><div class="text-muted small">{{ n.category }} · {{ n.created_at.strftime('%d %b') }}</div><a href="{{ url_for('news.detail', id=n.id) }}" class="btn btn-blue btn-sm mt-1 py-0">Read</a></div></div>{% endfor %}</div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

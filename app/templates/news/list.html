@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Tourism News – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item active">News</li></ol></nav><h1><i class="bi bi-newspaper me-2 text-gold"></i>Tourism News & Updates</h1></div></div>
+<div class="container py-4">
+  {% if featured %}
+  <div class="row g-4 mb-4">
+    {% for n in featured[:2] %}
+    <div class="col-md-6">
+      <div class="news-card card h-100">
+        <div class="card-img-wrap" style="height:240px"><img src="{{ n.image_url or 'https://placehold.co/800x500/1a3a6b/c9a227?text=News' }}" alt="{{ n.title }}" loading="lazy"><div class="card-category-badge"><i class="bi bi-star-fill me-1"></i>Featured</div></div>
+        <div class="card-body"><span class="badge bg-blue-100 text-blue mb-2">{{ n.category }}</span><h4 class="card-title fw-bold text-blue">{{ n.title }}</h4><p class="text-muted small">{{ n.content[:200] }}…</p><div class="d-flex justify-content-between align-items-center"><small class="text-muted">By {{ n.author }} · {{ n.created_at.strftime('%d %b %Y') }}</small><a href="{{ url_for('news.detail', id=n.id) }}" class="btn btn-blue btn-sm">Read More</a></div></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <form method="GET" class="filter-bar mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-5"><input type="text" name="q" class="form-control" placeholder="Search articles…" value="{{ search_q }}"></div>
+      <div class="col-md-4"><select name="category" class="form-select"><option value="">All Categories</option>{% for c in categories %}<option value="{{ c }}" {% if selected_category==c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
+      <div class="col-md-3"><button type="submit" class="btn btn-blue w-100"><i class="bi bi-search me-1"></i>Search</button></div>
+    </div>
+  </form>
+  {% if articles %}
+  <div class="row g-4">
+    {% for n in articles %}
+    <div class="col-md-6 col-lg-4">
+      <div class="news-card card h-100">
+        <div class="card-img-wrap" style="height:180px"><img src="{{ n.image_url or 'https://placehold.co/800x500/1a3a6b/c9a227?text=News' }}" alt="{{ n.title }}" loading="lazy"></div>
+        <div class="card-body d-flex flex-column"><span class="badge bg-blue-100 text-blue mb-1" style="font-size:.65rem">{{ n.category }}</span><h6 class="card-title fw-bold text-blue">{{ n.title }}</h6><p class="text-muted small text-truncate-2 flex-grow-1">{{ n.content[:150] }}…</p><div class="d-flex justify-content-between align-items-center mt-2"><small class="text-muted">{{ n.created_at.strftime('%d %b %Y') }}</small><a href="{{ url_for('news.detail', id=n.id) }}" class="btn btn-blue btn-sm py-0">Read</a></div></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}<div class="text-center py-5"><i class="bi bi-newspaper text-muted" style="font-size:4rem"></i><h4 class="text-muted mt-3">No articles found</h4></div>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+{% block title %}Attractions – Admin{% endblock %}
+{% block page_title %}Attractions{% endblock %}
+{% block page_subtitle %}Manage all tourism sites{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <form method="GET" class="d-flex gap-2">
+    <input type="text" name="q" class="form-control form-control-sm" placeholder="Search…" value="{{ q }}" style="width:220px">
+    <button type="submit" class="btn btn-blue btn-sm"><i class="bi bi-search"></i></button>
+  </form>
+  <a href="{{ url_for('admin.attraction_create') }}" class="btn btn-gold btn-sm"><i class="bi bi-plus me-1"></i>New Attraction</a>
+</div>
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0 admin-table">
+      <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Featured</th><th>Active</th><th>Views</th><th>QR</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for a in attractions %}
+      <tr>
+        <td><img src="{{ a.image_url or 'https://placehold.co/50x40/1a3a6b/c9a227?text=A' }}" width="50" height="40" style="object-fit:cover;border-radius:6px"></td>
+        <td><div class="fw-semibold small text-blue">{{ a.name }}</div><div class="text-muted" style="font-size:.7rem">{{ a.address[:40] }}</div></td>
+        <td class="small">{{ a.category.name if a.category else '—' }}</td>
+        <td class="small">{% if a.ticket_price > 0 %}₦{{ '{:,.0f}'.format(a.ticket_price) }}{% else %}Free{% endif %}</td>
+        <td>{% if a.featured %}<i class="bi bi-star-fill text-gold"></i>{% else %}<i class="bi bi-star text-muted"></i>{% endif %}</td>
+        <td>{% if a.active %}<span class="badge bg-success text-white" style="font-size:.65rem">Active</span>{% else %}<span class="badge bg-secondary text-white" style="font-size:.65rem">Inactive</span>{% endif %}</td>
+        <td class="small text-muted">{{ a.views }}</td>
+        <td>{% set qr = a.qr_codes|first if a.qr_codes else None %}{% if qr %}<img src="{{ qr.qr_image_path }}" width="30" height="30" title="Scanned {{ qr.scanned_count }}x">{% else %}<span class="text-muted small">None</span>{% endif %}</td>
+        <td>
+          <div class="d-flex gap-1">
+            <a href="{{ url_for('attractions.detail', id=a.id) }}" target="_blank" class="btn btn-outline-secondary btn-sm py-0" title="View"><i class="bi bi-eye"></i></a>
+            <a href="{{ url_for('admin.attraction_edit', id=a.id) }}" class="btn btn-outline-secondary btn-sm py-0" title="Edit"><i class="bi bi-pencil"></i></a>
+            <form method="POST" action="{{ url_for('admin.attraction_regen_qr', id=a.id) }}" class="d-inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-secondary btn-sm py-0" title="Regen QR"><i class="bi bi-qr-code"></i></button></form>
+            <form method="POST" action="{{ url_for('admin.attraction_delete', id=a.id) }}" class="d-inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-danger btn-sm py-0" onclick="return confirm('Delete {{ a.name }}?')"><i class="bi bi-trash"></i></button></form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% if pagination.pages > 1 %}<nav class="mt-3 d-flex justify-content-center"><ul class="pagination pagination-sm">{% for p in pagination.iter_pages() %}{% if p %}<li class="page-item {% if p==pagination.page %}active{% endif %}"><a class="page-link" href="?page={{ p }}&q={{ q }}">{{ p }}</a></li>{% endif %}{% endfor %}</ul></nav>{% endif %}
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Guides – Admin{% endblock %}
+{% block page_title %}Guide Management{% endblock %}
+{% block page_subtitle %}Manage certified tour guides{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <!-- Filter and Search -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <form method="GET" action="{{ url_for('admin.guides') }}" class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Search</label>
+            <div class="input-group">
+              <input type="text" name="q" class="form-control" placeholder="Search by name, email or phone..." value="{{ q or '' }}">
+              <button class="btn btn-gold" type="submit"><i class="bi bi-search"></i></button>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold small">Status</label>
+            <select name="status" class="form-select" onchange="this.form.submit()">
+              <option value="">All Statuses</option>
+              <option value="Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
+              <option value="Approved" {% if status_filter == 'Approved' %}selected{% endif %}>Approved</option>
+              <option value="Rejected" {% if status_filter == 'Rejected' %}selected{% endif %}>Rejected</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <a href="{{ url_for('admin.guides') }}" class="btn btn-outline-secondary w-100">Clear</a>
+          </div>
+          <div class="col-md-3">
+            <a href="{{ url_for('admin.guide_create') }}" class="btn btn-gold w-100">
+              <i class="bi bi-plus-circle me-1"></i>Add New Guide
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Guides Table -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 admin-table">
+            <thead class="bg-blue-100">
+              <tr>
+                <th class="px-3 py-2">Guide</th>
+                <th class="px-3 py-2">Phone</th>
+                <th class="px-3 py-2">Languages</th>
+                <th class="px-3 py-2 text-center">Experience</th>
+                <th class="px-3 py-2 text-end">Rate/hr</th>
+                <th class="px-3 py-2 text-center">Status</th>
+                <th class="px-3 py-2 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for g in guides %}
+              <tr>
+                <td class="px-3 py-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="avatar-initials-sm" style="width:32px;height:32px;font-size:0.7rem">
+                      {{ g.user.first_name[0] if g.user else 'G' }}{{ g.user.last_name[0] if g.user else 'U' }}
+                    </div>
+                    <div>
+                      <div class="fw-semibold text-blue" style="font-size:0.85rem">
+                        {{ g.user.full_name if g.user else 'Unknown Guide' }}
+                      </div>
+                      <small class="text-muted" style="font-size:0.7rem">
+                        {{ g.user.email if g.user else 'No email' }}
+                      </small>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-3 py-2">
+                  {% if g.phone %}
+                  <a href="tel:{{ g.phone }}" class="text-decoration-none text-dark">
+                    <i class="bi bi-telephone me-1 text-gold"></i>{{ g.phone }}
+                  </a>
+                  {% else %}
+                  <span class="text-muted small">—</span>
+                  {% endif %}
+                </td>
+                <td class="px-3 py-2">
+                  <div class="d-flex flex-wrap gap-1">
+                    {% if g.languages %}
+                      {% for lang in g.languages.split(',') %}
+                      <span class="lang-badge" style="font-size:0.6rem;padding:1px 6px">{{ lang.strip() }}</span>
+                      {% endfor %}
+                    {% else %}
+                      <span class="text-muted small">—</span>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="px-3 py-2 text-center">{{ g.experience or 0 }} yrs</td>
+                <td class="px-3 py-2 text-end fw-semibold text-gold">₦{{ '{:,.0f}'.format(g.hourly_rate or 0) }}</td>
+                <td class="px-3 py-2 text-center">
+                  {% if g.verification_status == 'Approved' %}
+                  <span class="badge bg-success">Approved</span>
+                  {% elif g.verification_status == 'Pending' %}
+                  <span class="badge bg-warning text-dark">Pending</span>
+                  {% elif g.verification_status == 'Rejected' %}
+                  <span class="badge bg-danger">Rejected</span>
+                  {% else %}
+                  <span class="badge bg-secondary">{{ g.verification_status or 'Unknown' }}</span>
+                  {% endif %}
+                </td>
+                <td class="px-3 py-2 text-center">
+                  <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('admin.guide_edit', id=g.id) }}" class="btn btn-outline-blue" title="Edit">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                      <span class="visually-hidden">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li>
+                        <form method="POST" action="{{ url_for('admin.guide_verify', id=g.id) }}">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                          <input type="hidden" name="action" value="Approved">
+                          <button class="dropdown-item text-success" type="submit">
+                            <i class="bi bi-check-circle me-2"></i>Approve
+                          </button>
+                        </form>
+                      </li>
+                      <li>
+                        <form method="POST" action="{{ url_for('admin.guide_verify', id=g.id) }}">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                          <input type="hidden" name="action" value="Pending">
+                          <button class="dropdown-item text-warning" type="submit">
+                            <i class="bi bi-clock me-2"></i>Set Pending
+                          </button>
+                        </form>
+                      </li>
+                      <li>
+                        <form method="POST" action="{{ url_for('admin.guide_verify', id=g.id) }}">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                          <input type="hidden" name="action" value="Rejected">
+                          <button class="dropdown-item text-danger" type="submit">
+                            <i class="bi bi-x-circle me-2"></i>Reject
+                          </button>
+                        </form>
+                      </li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li>
+                        <form method="POST" action="{{ url_for('admin.guide_delete', id=g.id) }}" onsubmit="return confirm('Are you sure you want to delete this guide?')">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                          <button class="dropdown-item text-danger" type="submit">
+                            <i class="bi bi-trash me-2"></i>Delete
+                          </button>
+                        </form>
+                      </li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted">
+                  <i class="bi bi-person-x fs-2 d-block mb-2"></i>
+                  No guides found. <a href="{{ url_for('admin.guide_create') }}">Add your first guide</a>.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% if pagination and pagination.pages > 1 %}
+      <div class="card-footer bg-transparent py-2">
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="text-muted">Showing {{ guides|length }} guide(s)</small>
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              {% if pagination.has_prev %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin.guides', page=pagination.prev_num, q=q, status=status_filter) }}">&laquo;</a>
+              </li>
+              {% endif %}
+              {% for page_num in pagination.iter_pages() %}
+                {% if page_num %}
+                  {% if page_num == pagination.page %}
+                  <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                  {% else %}
+                  <li class="page-item"><a class="page-link" href="{{ url_for('admin.guides', page=page_num, q=q, status=status_filter) }}">{{ page_num }}</a></li>
+                  {% endif %}
+                {% else %}
+                  <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+              {% endfor %}
+              {% if pagination.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin.guides', page=pagination.next_num, q=q, status=status_filter) }}">&raquo;</a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}. open the file

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Events – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item active">Events</li></ol></nav><h1><i class="bi bi-calendar-event me-2 text-gold"></i>Tourism Events</h1><p class="text-white-50">Festivals, safaris, cultural fairs, and more across Edo State</p></div></div>
+<div class="container py-4">
+  <form method="GET" class="filter-bar mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-5"><input type="text" name="q" class="form-control" placeholder="Search events…" value="{{ search_q }}"></div>
+      <div class="col-md-4">
+        <div class="btn-group w-100" role="group">
+          <a href="?filter=upcoming{{ '&q='+search_q if search_q else '' }}" class="btn {% if filter_type=='upcoming' %}btn-blue{% else %}btn-outline-secondary{% endif %}">Upcoming</a>
+          <a href="?filter=all{{ '&q='+search_q if search_q else '' }}" class="btn {% if filter_type=='all' %}btn-blue{% else %}btn-outline-secondary{% endif %}">All Events</a>
+          <a href="?filter=past{{ '&q='+search_q if search_q else '' }}" class="btn {% if filter_type=='past' %}btn-blue{% else %}btn-outline-secondary{% endif %}">Past</a>
+        </div>
+      </div>
+      <div class="col-md-3"><button type="submit" class="btn btn-blue w-100"><i class="bi bi-search me-1"></i>Search</button></div>
+    </div>
+  </form>
+  {% if events %}
+  <div class="row g-4">
+    {% for e in events %}
+    <div class="col-md-6 col-lg-4">
+      <div class="event-card card h-100">
+        <div class="card-img-wrap" style="height:200px">
+          <img src="{{ e.image_url or 'https://placehold.co/800x500/1a3a6b/c9a227?text=Event' }}" alt="{{ e.name }}" loading="lazy">
+          {% if e.category %}<div class="card-category-badge">{{ e.category }}</div>{% endif %}
+          <div class="card-price-badge">{% if e.ticket_price == 0 %}Free{% else %}₦{{ '{:,.0f}'.format(e.ticket_price) }}{% endif %}</div>
+          {% if e.featured %}<div style="position:absolute;bottom:10px;right:10px"><span class="badge bg-gold text-dark">Featured</span></div>{% endif %}
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title fw-bold text-blue mb-1">{{ e.name }}</h5>
+          <div class="d-flex flex-wrap gap-2 text-muted small mb-2">
+            <span><i class="bi bi-calendar me-1"></i>{{ e.date.strftime('%d %b %Y') }}</span>
+            <span><i class="bi bi-geo-alt me-1"></i>{{ e.location }}</span>
+          </div>
+          <p class="text-muted small text-truncate-2 flex-grow-1">{{ e.description }}</p>
+          {% if e.is_upcoming %}
+          <div class="d-flex gap-1 align-items-center mb-2" id="cd-{{ e.id }}" data-countdown="{{ e.date.isoformat() }}">
+            <span class="text-muted small">Starts in:</span>
+          </div>
+          {% endif %}
+          <div class="d-flex gap-2 mt-auto">
+            <a href="{{ url_for('events.detail', id=e.id) }}" class="btn btn-blue btn-sm flex-grow-1">View Event</a>
+            {% if e.is_upcoming and e.ticket_price > 0 and current_user.is_authenticated %}
+            <a href="{{ url_for('bookings.new_booking', booking_type='Event', target_id=e.id) }}" class="btn btn-gold btn-sm">Register</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}<div class="text-center py-5"><i class="bi bi-calendar-x text-muted" style="font-size:4rem"></i><h4 class="text-muted mt-3">No events found</h4></div>{% endif %}
+</div>
+{% endblock %}

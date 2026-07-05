@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Attractions – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item active">Attractions</li></ol></nav>
+    <h1 class="mb-1"><i class="bi bi-building me-2 text-gold"></i>Explore Attractions</h1>
+    <p class="text-white-50">Discover {{ pagination.total }} heritage sites, nature reserves, and cultural landmarks in Edo State</p>
+  </div>
+</div>
+<div class="container py-4">
+  <!-- Filter Bar -->
+  <form method="GET" class="filter-bar mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-4"><input type="text" name="q" class="form-control" placeholder="Search attractions…" value="{{ search_q }}"></div>
+      <div class="col-md-3">
+        <select name="category" class="form-select">
+          <option value="">All Categories</option>
+          {% for c in categories %}<option value="{{ c.id }}" {% if current_category == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="sort" class="form-select">
+          <option value="name" {% if sort=='name' %}selected{% endif %}>Name A-Z</option>
+          <option value="price_asc" {% if sort=='price_asc' %}selected{% endif %}>Price Low</option>
+          <option value="price_desc" {% if sort=='price_desc' %}selected{% endif %}>Price High</option>
+          <option value="views" {% if sort=='views' %}selected{% endif %}>Most Viewed</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-check-label d-flex align-items-center gap-2">
+          <input type="checkbox" name="featured" class="form-check-input" {% if request.args.get('featured') %}checked{% endif %}> Featured Only
+        </label>
+      </div>
+      <div class="col-md-1"><button type="submit" class="btn btn-blue w-100"><i class="bi bi-search"></i></button></div>
+    </div>
+  </form>
+
+  {% if attractions %}
+  <div class="row g-4">
+    {% for a in attractions %}
+    <div class="col-md-6 col-lg-4">
+      <div class="attraction-card card h-100">
+        <div class="card-img-wrap">
+          <img src="{{ a.image_url or 'https://placehold.co/800x500/1a3a6b/c9a227?text=Attraction' }}" alt="{{ a.name }}" loading="lazy">
+          {% if a.category %}<div class="card-category-badge">{{ a.category.name }}</div>{% endif %}
+          <div class="card-price-badge">{% if a.ticket_price > 0 %}₦{{ '{:,.0f}'.format(a.ticket_price) }}{% else %}Free{% endif %}</div>
+          {% if a.featured %}<div style="position:absolute;bottom:10px;left:10px"><span class="badge bg-gold text-dark"><i class="bi bi-star-fill me-1"></i>Featured</span></div>{% endif %}
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title fw-bold text-blue mb-1">{{ a.name }}</h5>
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <div class="star-rating">{% for i in range(1,6) %}<i class="bi bi-star{% if i <= a.avg_rating %}-fill{% endif %}"></i>{% endfor %}</div>
+            <small class="text-muted">{{ a.avg_rating }}</small>
+            <small class="text-muted ms-auto"><i class="bi bi-eye me-1"></i>{{ a.views }}</small>
+          </div>
+          <p class="card-text text-muted text-truncate-2 small flex-grow-1">{{ a.description }}</p>
+          <div class="mt-2">
+            <small class="text-muted d-block mb-2"><i class="bi bi-clock me-1"></i>{{ a.opening_hours or 'Hours vary' }}</small>
+            <div class="d-flex gap-2">
+              <a href="{{ url_for('attractions.detail', id=a.id) }}" class="btn btn-blue btn-sm flex-grow-1">Explore</a>
+              {% if current_user.is_authenticated %}
+              <form method="POST" action="{{ url_for('dashboard.toggle_favourite', target_type='Attraction', target_id=a.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-outline-gold btn-sm"><i class="bi bi-heart"></i></button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <!-- Pagination -->
+  {% if pagination.pages > 1 %}
+  <nav class="mt-4 d-flex justify-content-center">
+    <ul class="pagination">
+      {% if pagination.has_prev %}<li class="page-item"><a class="page-link" href="{{ request.url | replace('page='+pagination.page|string, 'page='+(pagination.page-1)|string) }}">«</a></li>{% endif %}
+      {% for p in pagination.iter_pages() %}{% if p %}<li class="page-item {% if p==pagination.page %}active{% endif %}"><a class="page-link" href="?page={{ p }}&q={{ search_q }}&category={{ current_category or '' }}&sort={{ sort }}">{{ p }}</a></li>{% endif %}{% endfor %}
+      {% if pagination.has_next %}<li class="page-item"><a class="page-link" href="{{ request.url | replace('page='+pagination.page|string, 'page='+(pagination.page+1)|string) }}">»</a></li>{% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-compass text-muted" style="font-size:4rem"></i>
+    <h4 class="text-muted mt-3">No attractions found</h4>
+    <p class="text-muted">Try adjusting your search filters.</p>
+    <a href="{{ url_for('attractions.list_attractions') }}" class="btn btn-blue">Clear Filters</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

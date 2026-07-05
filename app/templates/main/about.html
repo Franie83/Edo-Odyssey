@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}About ESTA – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item active">About</li></ol></nav><h1><i class="bi bi-building-check me-2 text-gold"></i>About ESTA</h1><p class="text-white-50">Edo State Tourism Agency – The official custodian of Edo's tourism heritage</p></div></div>
+<div class="container py-5">
+  <div class="row g-5 align-items-center mb-5">
+    <div class="col-lg-6">
+      <div class="section-badge"><i class="bi bi-award me-1"></i>Our Mission</div>
+      <h2 class="section-title mb-3">Preserving Culture, Driving Development</h2>
+      <p class="text-muted lh-lg">{{ cms.get('about_agency','The Edo State Tourism Agency (ESTA) is the official government body mandated to develop, regulate and promote tourism in Edo State, Nigeria. We are committed to showcasing Edo\'s extraordinary cultural heritage—from the ancient Benin Kingdom to modern arts and natural wonders—to the world.') }}</p>
+      <div class="row g-3 mt-3">
+        <div class="col-6"><div class="info-card text-center"><div class="fw-bold text-gold fs-3">{{ total_attractions }}+</div><div class="text-muted small">Attractions</div></div></div>
+        <div class="col-6"><div class="info-card text-center"><div class="fw-bold text-gold fs-3">{{ total_guides }}+</div><div class="text-muted small">Certified Guides</div></div></div>
+        <div class="col-6"><div class="info-card text-center"><div class="fw-bold text-gold fs-3">600+</div><div class="text-muted small">Years of History</div></div></div>
+        <div class="col-6"><div class="info-card text-center"><div class="fw-bold text-gold fs-3">36</div><div class="text-muted small">LGAs Covered</div></div></div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <img src="https://images.unsplash.com/photo-1566041510394-cf7c1b1edc14?auto=format&fit=crop&q=80&w=900" class="w-100 rounded-4 shadow-lg" alt="ESTA" style="max-height:420px;object-fit:cover">
+    </div>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100 p-4 text-center">
+        <div class="mb-3" style="font-size:2.5rem;color:var(--gold-500)"><i class="bi bi-eye-fill"></i></div>
+        <h5 class="fw-bold text-blue">Our Vision</h5>
+        <p class="text-muted">{{ cms.get('about_vision','To make Edo State the premier heritage tourism destination in West Africa.') }}</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100 p-4 text-center">
+        <div class="mb-3" style="font-size:2.5rem;color:var(--blue-800)"><i class="bi bi-bullseye"></i></div>
+        <h5 class="fw-bold text-blue">Our Mission</h5>
+        <p class="text-muted">{{ cms.get('about_mission','To develop, regulate, and promote tourism in Edo State through sustainable practices.') }}</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100 p-4 text-center">
+        <div class="mb-3" style="font-size:2.5rem;color:var(--gold-500)"><i class="bi bi-gem"></i></div>
+        <h5 class="fw-bold text-blue">Our Values</h5>
+        <p class="text-muted">{{ cms.get('about_values','Integrity, excellence, cultural respect, and community empowerment guide every decision we make.') }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-blue-100 rounded-4 p-4 mb-5">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-8">
+        <h3 class="fw-bold text-blue mb-2">Cradle of Black Civilization</h3>
+        <p class="text-muted mb-0">Edo State is home to the ancient Benin Kingdom, one of the oldest and most sophisticated kingdoms in West Africa. The Kingdom's bronzes, ivories, and cultural traditions continue to inspire the world today. UNESCO recognizes the Benin City Historical Road network as a heritage site of global significance.</p>
+      </div>
+      <div class="col-lg-4 text-center">
+        <a href="{{ url_for('attractions.list_attractions') }}" class="btn btn-blue btn-lg px-4 fw-semibold"><i class="bi bi-compass me-2"></i>Explore Heritage Sites</a>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="fw-bold text-blue text-center mb-4">Leadership & Contact</h3>
+  <div class="row g-4 justify-content-center">
+    <div class="col-md-6 col-lg-4">
+      <div class="card border-0 shadow-sm p-4 text-center">
+        <div class="mb-3" style="font-size:2rem;color:var(--blue-800)"><i class="bi bi-geo-alt-fill text-gold"></i></div>
+        <h6 class="fw-bold text-blue">Office Address</h6>
+        <p class="text-muted small">{{ cms.get('contact_address','Ministry of Tourism HQ, Benin City, Edo State, Nigeria') }}</p>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card border-0 shadow-sm p-4 text-center">
+        <div class="mb-3" style="font-size:2rem"><i class="bi bi-telephone-fill text-gold"></i></div>
+        <h6 class="fw-bold text-blue">Phone</h6>
+        <p class="text-muted small">{{ cms.get('contact_phone','+234 52 123 4567') }}</p>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card border-0 shadow-sm p-4 text-center">
+        <div class="mb-3" style="font-size:2rem"><i class="bi bi-envelope-fill text-gold"></i></div>
+        <h6 class="fw-bold text-blue">Email</h6>
+        <p class="text-muted small">{{ cms.get('contact_email','info@edotourism.gov.ng') }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

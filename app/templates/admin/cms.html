@@ -1,0 +1,95 @@
+{% extends "admin/base.html" %}
+{% block title %}CMS Settings – Admin{% endblock %}
+{% block page_title %}CMS & Content Settings{% endblock %}
+{% block page_subtitle %}Manage site-wide content, FAQs, and partners{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-gear me-2 text-gold"></i>Site Content Settings</h6></div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('admin.cms_update') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% set grouped = {} %}
+          {% for s in settings %}
+            {% if s.group not in grouped %}{% set _ = grouped.update({s.group: []}) %}{% endif %}
+            {% set _ = grouped[s.group].append(s) %}
+          {% endfor %}
+          {% for group, items in grouped.items() %}
+          <h6 class="fw-bold text-gold text-uppercase mt-3 mb-2" style="font-size:.75rem;letter-spacing:.1em">{{ group | title }}</h6>
+          {% for s in items %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">{{ s.label or s.key }}</label>
+            {% if 'content' in s.key or 'policy' in s.key or 'conditions' in s.key or 'about' in s.key or 'mission' in s.key or 'vision' in s.key or 'subtitle' in s.key %}
+            <textarea name="{{ s.key }}" class="form-control" rows="4">{{ s.value }}</textarea>
+            {% else %}
+            <input type="text" name="{{ s.key }}" class="form-control" value="{{ s.value }}">
+            {% endif %}
+          </div>
+          {% endfor %}
+          {% endfor %}
+          <button type="submit" class="btn btn-gold px-4 fw-semibold"><i class="bi bi-save me-2"></i>Save All Settings</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- FAQs -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-question-circle me-2 text-gold"></i>FAQs</h6></div>
+      <div class="card-body">
+        {% for f in faqs %}
+        <div class="border rounded p-3 mb-2 bg-gray-50">
+          <div class="d-flex justify-content-between">
+            <div class="fw-semibold small text-blue">{{ f.question }}</div>
+            <form method="POST" action="{{ url_for('admin.faq_delete', id=f.id) }}" class="d-inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-danger btn-sm py-0" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></button></form>
+          </div>
+          <div class="text-muted small mt-1">{{ f.answer[:120] }}…</div>
+        </div>
+        {% endfor %}
+        <hr>
+        <h6 class="fw-bold text-blue mb-3">Add New FAQ</h6>
+        <form method="POST" action="{{ url_for('admin.faq_create') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="mb-2"><input type="text" name="question" class="form-control" placeholder="Question…" required></div>
+          <div class="mb-2"><textarea name="answer" class="form-control" rows="3" placeholder="Answer…" required></textarea></div>
+          <div class="row g-2 mb-2"><div class="col"><input type="text" name="category" class="form-control" placeholder="Category" value="general"></div><div class="col"><input type="number" name="order" class="form-control" placeholder="Sort order" value="0"></div></div>
+          <button type="submit" class="btn btn-blue btn-sm"><i class="bi bi-plus me-1"></i>Add FAQ</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <!-- Partners -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold text-blue mb-0"><i class="bi bi-handshake me-2 text-gold"></i>Partners & Sponsors</h6></div>
+      <div class="card-body">
+        {% for p in partners %}
+        <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
+          <div>
+            <div class="fw-semibold small">{{ p.name }}</div>
+            <span class="badge bg-blue-100 text-blue" style="font-size:.6rem">{{ p.type }}</span>
+          </div>
+          <form method="POST" action="{{ url_for('admin.partner_delete', id=p.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash"></i></button></form>
+        </div>
+        {% endfor %}
+        <hr>
+        <h6 class="fw-bold text-blue mb-2 small">Add Partner / Sponsor</h6>
+        <form method="POST" action="{{ url_for('admin.partner_create') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="mb-1"><input type="text" name="name" class="form-control form-control-sm" placeholder="Name" required></div>
+          <div class="mb-1"><input type="url" name="logo_url" class="form-control form-control-sm" placeholder="Logo URL (https://…)"></div>
+          <div class="mb-1"><input type="url" name="website" class="form-control form-control-sm" placeholder="Website"></div>
+          <div class="mb-1">
+            <select name="type" class="form-select form-select-sm">
+              <option value="partner">Partner</option>
+              <option value="sponsor">Sponsor</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-blue btn-sm w-100"><i class="bi bi-plus me-1"></i>Add</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

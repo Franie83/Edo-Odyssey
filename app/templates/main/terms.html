@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Terms & Conditions – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item active">Terms</li></ol></nav><h1><i class="bi bi-file-earmark-text me-2 text-gold"></i>Terms & Conditions</h1></div></div>
+<div class="container py-5"><div class="row justify-content-center"><div class="col-lg-8">
+  <div class="card border-0 shadow-sm p-4">
+    <div class="text-muted lh-lg">
+    {{ cms.get('terms_conditions','<h5>1. Acceptance</h5><p>By using Edo Odyssey, you agree to these Terms & Conditions. If you do not agree, please do not use the platform.</p><h5>2. Account Responsibility</h5><p>You are responsible for maintaining the confidentiality of your account credentials and all activities under your account.</p><h5>3. Bookings & Payments</h5><p>All bookings are subject to availability. Prices are in Nigerian Naira (₦). Cancellation policies vary by service provider.</p><h5>4. Guide & Vendor Listings</h5><p>ESTA verifies guide credentials before publication. Hotel and restaurant listings are provided in good faith; ESTA is not liable for service quality disputes.</p><h5>5. Content</h5><p>Users may not post offensive, fraudulent, or misleading content. ESTA reserves the right to remove any content at its discretion.</p><h5>6. Limitation of Liability</h5><p>ESTA is not liable for any indirect, incidental, or consequential damages arising from your use of the platform.</p><h5>7. Changes</h5><p>We may update these terms at any time. Continued use of the platform constitutes acceptance of updated terms.</p>') | safe }}
+    </div>
+  </div>
+</div></div></div>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}{{ attraction.name }} – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item"><a href="{{ url_for('attractions.list_attractions') }}">Attractions</a></li><li class="breadcrumb-item active">{{ attraction.name }}</li></ol></nav>
+    <h1 class="mb-1">{{ attraction.name }}</h1>
+    <div class="d-flex flex-wrap gap-3 align-items-center">
+      {% if attraction.category %}<span class="badge bg-gold text-dark">{{ attraction.category.name }}</span>{% endif %}
+      <span class="text-white-50"><i class="bi bi-geo-alt me-1"></i>{{ attraction.address }}</span>
+      <span class="text-white-50"><i class="bi bi-eye me-1"></i>{{ attraction.views }} views</span>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <!-- Gallery -->
+      <div class="detail-image mb-4 position-relative">
+        <img src="{{ attraction.image_url or 'https://placehold.co/1200x600/1a3a6b/c9a227?text=Attraction' }}" alt="{{ attraction.name }}" class="w-100 h-100" style="object-fit:cover;border-radius:var(--radius)">
+        {% if attraction.featured %}<div style="position:absolute;top:16px;right:16px"><span class="badge bg-gold text-dark fs-6 px-3 py-2"><i class="bi bi-star-fill me-1"></i>Featured Attraction</span></div>{% endif %}
+      </div>
+
+      <!-- Meta badges -->
+      <div class="d-flex flex-wrap gap-3 mb-4">
+        <span class="detail-meta"><i class="bi bi-clock text-gold"></i><span>{{ attraction.opening_hours or 'Hours vary' }}</span></span>
+        <span class="detail-meta"><i class="bi bi-ticket text-gold"></i><span>{% if attraction.ticket_price > 0 %}₦{{ '{:,.0f}'.format(attraction.ticket_price) }}{% else %}Free Entry{% endif %}</span></span>
+        {% if attraction.contact %}<span class="detail-meta"><i class="bi bi-telephone text-gold"></i><a href="tel:{{ attraction.contact }}">{{ attraction.contact }}</a></span>{% endif %}
+        {% if attraction.website %}<span class="detail-meta"><i class="bi bi-globe text-gold"></i><a href="{{ attraction.website }}" target="_blank">Website</a></span>{% endif %}
+      </div>
+
+      <!-- Description -->
+      <div class="mb-4">
+        <h3 class="fw-bold text-blue mb-3">About this Attraction</h3>
+        <p class="text-muted lh-lg">{{ attraction.description }}</p>
+      </div>
+
+      <!-- History -->
+      {% if attraction.history %}
+      <div class="info-card mb-4">
+        <h5 class="fw-bold text-blue mb-2"><i class="bi bi-book me-2 text-gold"></i>Historical Background</h5>
+        <p class="text-muted mb-0 lh-lg">{{ attraction.history }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Map -->
+      <div class="mb-4">
+        <h5 class="fw-bold text-blue mb-3"><i class="bi bi-map me-2 text-gold"></i>Location</h5>
+        <div class="map-placeholder rounded" data-lat="{{ attraction.latitude }}" data-lng="{{ attraction.longitude }}" data-name="{{ attraction.name }}" style="min-height:280px"></div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-blue mb-0"><i class="bi bi-chat-square-text me-2 text-gold"></i>Reviews ({{ reviews|length }})</h5>
+          <div class="star-rating fs-5">
+            {% for i in range(1,6) %}<i class="bi bi-star{% if i <= attraction.avg_rating %}-fill{% endif %}"></i>{% endfor %}
+            <span class="ms-1 fs-6 text-muted">{{ attraction.avg_rating }}/5</span>
+          </div>
+        </div>
+        {% for r in reviews %}
+        <div class="review-card mb-3">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <div class="review-avatar">{{ r.user.first_name[0] if r.user else '?' }}</div>
+              <div>
+                <div class="fw-semibold small">{{ r.user.full_name if r.user else 'Anonymous' }}</div>
+                <div class="text-muted" style="font-size:.7rem">{{ r.created_at.strftime('%d %b %Y') }}</div>
+              </div>
+            </div>
+            <div class="star-rating">{% for i in range(1,6) %}<i class="bi bi-star{% if i <= r.rating %}-fill{% endif %}"></i>{% endfor %}</div>
+          </div>
+          <p class="mb-0 small text-muted">{{ r.comment }}</p>
+        </div>
+        {% endfor %}
+        {% if current_user.is_authenticated %}
+        <div class="card border-0 bg-blue-100 p-3 rounded-3">
+          <h6 class="fw-bold text-blue mb-3">Leave Your Review</h6>
+          <form method="POST" action="{{ url_for('reviews.add_review', target_type='Attraction', target_id=attraction.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="redirect_url" value="{{ request.url }}">
+            <div class="mb-2">
+              <div class="star-select d-flex gap-1 mb-2" style="font-size:1.5rem; cursor:pointer">
+                <input type="hidden" name="rating" value="5">
+                {% for i in range(1,6) %}<i class="bi bi-star-fill text-gold" data-star="{{ i }}"></i>{% endfor %}
+              </div>
+            </div>
+            <textarea name="comment" class="form-control mb-2 border-0" rows="3" placeholder="Share your experience…" required></textarea>
+            <button type="submit" class="btn btn-blue btn-sm">Submit Review</button>
+          </form>
+        </div>
+        {% else %}
+        <div class="alert alert-light border-0 bg-blue-100"><a href="{{ url_for('auth.login') }}" class="text-blue fw-semibold">Log in</a> to leave a review.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- QR Code -->
+      {% if qr %}
+      <div class="sidebar-card text-center">
+        <h6>Scan QR to Share</h6>
+        <div class="qr-frame d-inline-block">
+          <img src="{{ qr.qr_image_path }}" alt="QR Code" width="140" height="140">
+        </div>
+        <p class="text-muted small mt-2 mb-1">Scan to open on mobile</p>
+        <p class="text-muted" style="font-size:.7rem"><i class="bi bi-qr-code me-1"></i>Scanned {{ qr.scanned_count }} times</p>
+      </div>
+      {% endif %}
+
+      <!-- Book a Guide -->
+      <div class="sidebar-card">
+        <h6>Book a Local Guide</h6>
+        <p class="text-muted small">Enhance your visit with a certified Edo State tour guide.</p>
+        <a href="{{ url_for('guides.list_guides') }}" class="btn btn-gold w-100 btn-sm fw-semibold"><i class="bi bi-person-badge me-2"></i>Find Guides</a>
+      </div>
+
+      <!-- Key Facts -->
+      <div class="sidebar-card">
+        <h6>Key Facts</h6>
+        <ul class="list-unstyled small text-muted">
+          <li class="mb-2"><i class="bi bi-geo-alt text-gold me-2"></i>{{ attraction.address }}</li>
+          <li class="mb-2"><i class="bi bi-clock text-gold me-2"></i>{{ attraction.opening_hours or 'Hours vary' }}</li>
+          <li class="mb-2"><i class="bi bi-ticket text-gold me-2"></i>{% if attraction.ticket_price > 0 %}₦{{ '{:,.0f}'.format(attraction.ticket_price) }}{% else %}Free{% endif %}</li>
+          <li class="mb-2"><i class="bi bi-geo text-gold me-2"></i>{{ attraction.latitude }}, {{ attraction.longitude }}</li>
+        </ul>
+        {% if current_user.is_authenticated %}
+        <form method="POST" action="{{ url_for('bookings.new_booking', booking_type='Tour', target_id=attraction.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <a href="{{ url_for('bookings.new_booking', booking_type='Tour', target_id=attraction.id) }}" class="btn btn-blue w-100 btn-sm fw-semibold mt-2"><i class="bi bi-calendar-plus me-2"></i>Book Tour</a>
+        </form>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-blue w-100 btn-sm mt-2">Login to Book</a>
+        {% endif %}
+      </div>
+
+      <!-- Nearby -->
+      {% if nearby %}
+      <div class="sidebar-card">
+        <h6>Nearby Attractions</h6>
+        {% for n in nearby %}
+        <div class="d-flex gap-2 mb-3">
+          <img src="{{ n.image_url or 'https://placehold.co/60x60/1a3a6b/c9a227?text=A' }}" width="52" height="52" style="object-fit:cover;border-radius:8px;flex-shrink:0" alt="{{ n.name }}">
+          <div>
+            <div class="fw-semibold small text-blue">{{ n.name }}</div>
+            <div class="text-muted" style="font-size:.7rem">{{ n.opening_hours or '' }}</div>
+            <a href="{{ url_for('attractions.detail', id=n.id) }}" class="text-blue" style="font-size:.75rem">Explore →</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

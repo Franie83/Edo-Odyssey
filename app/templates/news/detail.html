@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ article.title }} – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item"><a href="{{ url_for('news.list_news') }}">News</a></li><li class="breadcrumb-item active">Article</li></ol></nav><h1 style="font-size:1.8rem">{{ article.title }}</h1><p class="text-white-50 small">By {{ article.author }} · {{ article.created_at.strftime('%d %B %Y') }} · {{ article.views }} views</p></div></div>
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <img src="{{ article.image_url or 'https://placehold.co/1200x500/1a3a6b/c9a227?text=News' }}" alt="{{ article.title }}" class="w-100 mb-4" style="border-radius:var(--radius);max-height:420px;object-fit:cover">
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        <span class="badge bg-blue-800 text-white px-3 py-2">{{ article.category }}</span>
+        {% for t in article.tags_list %}<span class="badge bg-gold-100 text-gold-600 border border-gold" style="font-size:.7rem">{{ t }}</span>{% endfor %}
+      </div>
+      <div class="lh-lg text-dark" style="font-size:1.05rem">{{ article.content | replace('\n', '<br>') | safe }}</div>
+      <hr class="my-4">
+      <h5 class="fw-bold text-blue mb-3"><i class="bi bi-chat-square me-2 text-gold"></i>Comments ({{ comments|length }})</h5>
+      {% for c in comments %}<div class="review-card mb-3"><div class="d-flex align-items-center gap-2 mb-1"><div class="review-avatar">{{ c.user.first_name[0] if c.user else '?' }}</div><div><div class="fw-semibold small">{{ c.user.full_name if c.user else 'Visitor' }}</div><div class="text-muted" style="font-size:.7rem">{{ c.created_at.strftime('%d %b %Y') }}</div></div></div><p class="small text-muted mb-0">{{ c.comment }}</p></div>{% endfor %}
+      {% if current_user.is_authenticated %}<div class="bg-blue-100 p-3 rounded-3"><h6 class="fw-bold">Add a Comment</h6><form method="POST" action="{{ url_for('news.add_comment', id=article.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><textarea name="comment" class="form-control border-0 mb-2" rows="3" required placeholder="Share your thoughts…"></textarea><button type="submit" class="btn btn-blue btn-sm">Post Comment</button></form></div>{% else %}<div class="alert alert-light border-0 bg-blue-100"><a href="{{ url_for('auth.login') }}" class="text-blue fw-semibold">Log in</a> to comment.</div>{% endif %}
+    </div>
+    <div class="col-lg-4">
+      <div class="sidebar-card"><h6>Related Articles</h6>{% for r in related %}<div class="d-flex gap-2 mb-3"><img src="{{ r.image_url or 'https://placehold.co/60x60/1a3a6b/c9a227?text=N' }}" width="52" height="52" style="object-fit:cover;border-radius:8px;flex-shrink:0" alt="{{ r.title }}"><div><div class="small fw-semibold text-blue text-truncate-2">{{ r.title }}</div><div class="text-muted" style="font-size:.7rem">{{ r.created_at.strftime('%d %b') }}</div><a href="{{ url_for('news.detail', id=r.id) }}" class="text-blue" style="font-size:.75rem">Read →</a></div></div>{% endfor %}{% if not related %}<p class="text-muted small">No related articles.</p>{% endif %}</div>
+      <div class="sidebar-card"><h6>Share</h6><div class="d-flex gap-2"><a href="https://www.facebook.com/sharer?u={{ request.url }}" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="bi bi-facebook"></i></a><a href="https://twitter.com/intent/tweet?url={{ request.url }}&text={{ article.title }}" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="bi bi-twitter-x"></i></a><a href="https://wa.me/?text={{ article.title }}%20{{ request.url }}" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="bi bi-whatsapp"></i></a></div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

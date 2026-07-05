@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy – Edo Odyssey{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Home</a></li><li class="breadcrumb-item active">Privacy</li></ol></nav><h1><i class="bi bi-shield-lock me-2 text-gold"></i>Privacy Policy</h1></div></div>
+<div class="container py-5"><div class="row justify-content-center"><div class="col-lg-8">
+  <div class="card border-0 shadow-sm p-4">
+    <div class="text-muted lh-lg">
+    {{ cms.get('privacy_policy','<h5>Data We Collect</h5><p>We collect information you provide when registering, booking services or contacting us: name, email, phone number, and travel preferences.</p><h5>How We Use Your Data</h5><p>Your data is used solely to operate the Edo Odyssey platform — confirming bookings, sending notifications, and improving our services. We never sell your personal information.</p><h5>Cookies</h5><p>We use cookies to maintain your session and improve site performance. You can disable cookies in your browser settings, though some features may be affected.</p><h5>Data Security</h5><p>We employ industry-standard encryption and access controls to protect your personal data.</p><h5>Contact</h5><p>For privacy concerns, contact our Data Protection Officer at privacy@edotourism.gov.ng.</p>') | safe }}
+    </div>
+  </div>
+</div></div></div>
+{% endblock %}

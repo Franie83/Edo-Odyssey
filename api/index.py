@@ -25,14 +25,6 @@ def health():
         "database": "connected",
         "static_files": "available"
     })
-@app.route('/import-data')
-def import_data():
-    try:
-        from .import import run_import
-        result = run_import()
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
 
 # Migration endpoint
 @app.route('/migrate')
@@ -50,6 +42,16 @@ def migrate():
         })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+# Import data endpoint
+@app.route('/import-data')
+def import_data():
+    try:
+        from .import import run_import
+        result = run_import()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # Create tables on startup
 with app.app_context():

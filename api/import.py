@@ -14,11 +14,19 @@ def run_import():
     with app.app_context():
         try:
             # Load data
-            with open('data_export.json', 'r') as f:
+            data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_export.json')
+            
+            if not os.path.exists(data_file):
+                return {
+                    "success": False,
+                    "error": "data_export.json not found. Please run export_db.py first."
+                }
+            
+            with open(data_file, 'r') as f:
                 data = json.load(f)
             
             imported_count = 0
-            errors = []
+            skipped_count = 0
             
             # Import Users
             if 'users' in data:
@@ -33,8 +41,9 @@ def run_import():
                         new_user = User(**item)
                         db.session.add(new_user)
                         imported_count += 1
-            
-            db.session.commit()
+                    else:
+                        skipped_count += 1
+                db.session.commit()
             
             # Import Categories
             if 'categories' in data:
@@ -49,8 +58,9 @@ def run_import():
                         new_cat = Category(**item)
                         db.session.add(new_cat)
                         imported_count += 1
-            
-            db.session.commit()
+                    else:
+                        skipped_count += 1
+                db.session.commit()
             
             # Import Attractions
             if 'attractions' in data:
@@ -65,8 +75,9 @@ def run_import():
                         new_attraction = Attraction(**item)
                         db.session.add(new_attraction)
                         imported_count += 1
-            
-            db.session.commit()
+                    else:
+                        skipped_count += 1
+                db.session.commit()
             
             # Import Guides
             if 'guides' in data:
@@ -81,8 +92,9 @@ def run_import():
                         new_guide = Guide(**item)
                         db.session.add(new_guide)
                         imported_count += 1
-            
-            db.session.commit()
+                    else:
+                        skipped_count += 1
+                db.session.commit()
             
             # Import Hotels
             if 'hotels' in data:
@@ -97,8 +109,9 @@ def run_import():
                         new_hotel = Hotel(**item)
                         db.session.add(new_hotel)
                         imported_count += 1
-            
-            db.session.commit()
+                    else:
+                        skipped_count += 1
+                db.session.commit()
             
             # Import Restaurants
             if 'restaurants' in data:
@@ -113,8 +126,9 @@ def run_import():
                         new_restaurant = Restaurant(**item)
                         db.session.add(new_restaurant)
                         imported_count += 1
-            
-            db.session.commit()
+                    else:
+                        skipped_count += 1
+                db.session.commit()
             
             # Import Events
             if 'events' in data:
@@ -129,8 +143,9 @@ def run_import():
                         new_event = Event(**item)
                         db.session.add(new_event)
                         imported_count += 1
-            
-            db.session.commit()
+                    else:
+                        skipped_count += 1
+                db.session.commit()
             
             # Import Bookings
             if 'bookings' in data:
@@ -143,12 +158,12 @@ def run_import():
                     new_booking = Booking(**item)
                     db.session.add(new_booking)
                     imported_count += 1
-            
-            db.session.commit()
+                db.session.commit()
             
             return {
                 "success": True,
                 "message": f"Successfully imported {imported_count} records!",
+                "skipped": skipped_count,
                 "tables": list(data.keys())
             }
             

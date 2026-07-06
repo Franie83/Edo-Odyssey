@@ -159,32 +159,51 @@ def create_app(config_name=None):
     # Template filter for image URLs (handles Google Drive and missing images)
     @app.template_filter('image_src')
     def image_src_filter(url):
-        """Convert Google Drive URLs to direct image URLs and handle missing images"""
+        """Convert various image URLs to displayable URLs"""
+        from flask import current_app
+        
         if not url:
             return url_for('static', filename='images/placeholder.jpg')
         
-        # Check if it's a Google Drive URL
+        # Handle Google Drive URLs
         if "drive.google.com/file/d/" in url:
+            import re
             match = re.search(r"/d/([^/]+)", url)
             if match:
                 file_id = match.group(1)
                 return f"https://drive.google.com/uc?export=view&id={file_id}"
         
-        # Check if it's a Google Drive thumbnail URL
+        # Handle Google Drive thumbnail URLs
         if "drive.google.com/thumbnail" in url:
+            import re
             match = re.search(r"id=([^&]+)", url)
             if match:
                 file_id = match.group(1)
                 return f"https://drive.google.com/uc?export=view&id={file_id}"
         
-        # Check if it's a local upload path (starts with /static/uploads/)
+        # Handle local upload paths
         if url and url.startswith('/static/uploads/'):
-            # Check if the file exists
-            file_path = os.path.join(app.root_path, url.lstrip('/'))
-            if not os.path.exists(file_path):
-                return url_for('static', filename='images/placeholder.jpg')
+            # Check if the file exists on Vercel (using /tmp)
+            file_path = url.lstrip('/')
+            # Try both locations: app/static and /tmp
+            possible_paths = [
+                os.path.join(current_app.root_path, file_path),
+                os.path.join('/tmp', file_path.replace('static/uploads/', 'uploads/'))
+            ]
+            for path in possible_paths:
+                if os.path.exists(path):
+                    return url
+            
+            # Check if it's a valid URL with http
+            if url.startswith('http://') or url.startswith('https://'):
+                return url
         
-        return url
+        # Check if it's a full URL
+        if url and (url.startswith('http://') or url.startswith('https://')):
+            return url
+        
+        # Fallback to placeholder
+        return url_for('static', filename='images/placeholder.jpg')
     
     # Context processor for CMS settings
     @app.context_processor

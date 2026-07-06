@@ -8,7 +8,6 @@ login_manager = LoginManager()
 migrate = Migrate()
 csrf = CSRFProtect()
 
-
 @login_manager.user_loader
 def load_user(user_id):
     from .models.models import User

@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+*.pyo
+*.db
+*.sqlite
+*.sqlite3
+.env
+venv/
+.venv/
+.git/
+.gitignore
+README.md
+migrations/
+instance/
+uploads/
+static/uploads/

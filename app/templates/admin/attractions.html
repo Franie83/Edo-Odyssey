@@ -15,79 +15,81 @@
 
 <div class="card border-0 shadow-sm">
   <div class="card-body p-0">
-    <table class="table table-hover mb-0 admin-table">
-      <thead>
-        <tr>
-          <th>Image</th>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Price</th>
-          <th>Featured</th>
-          <th>Active</th>
-          <th>Views</th>
-          <th>QR</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for attraction in attractions %}
-        <tr>
-          <td>
-            <img src="{{ attraction.image_url | image_src }}" 
-                 width="50" 
-                 height="40" 
-                 style="object-fit:cover;border-radius:6px" 
-                 onerror="this.src='/static/images/placeholder.jpg'"
-                 alt="{{ attraction.name }}">
-          </td>
-          <td>
-            <div class="fw-semibold small text-blue">{{ attraction.name }}</div>
-            <div class="text-muted" style="font-size:.7rem">{{ attraction.address }}</div>
-          </td>
-          <td class="small">{{ attraction.category.name if attraction.category else '—' }}</td>
-          <td class="small">
-            {% if attraction.ticket_price == 0 %}Free{% else %}₦{{ attraction.ticket_price }}{% endif %}
-          </td>
-          <td>
-            {% if attraction.featured %}
-              <i class="bi bi-star-fill text-gold"></i>
-            {% else %}
-              <i class="bi bi-star text-muted"></i>
-            {% endif %}
-          </td>
-          <td>
-            {% if attraction.active %}
-              <span class="badge bg-success text-white" style="font-size:.65rem">Active</span>
-            {% else %}
-              <span class="badge bg-danger text-white" style="font-size:.65rem">Inactive</span>
-            {% endif %}
-          </td>
-          <td class="small text-muted">{{ attraction.views or 0 }}</td>
-          <td>
-            {% if attraction.qr_code_record %}
-              <img src="{{ attraction.qr_code_record.qr_image_path }}" width="30" height="30" title="Scanned {{ attraction.qr_code_record.scanned_count or 0 }}x" alt="QR">
-            {% else %}
-              <span class="text-muted small">None</span>
-            {% endif %}
-          </td>
-          <td>
-            <div class="d-flex gap-1">
-              <a href="{{ url_for('attractions.detail', id=attraction.id) }}" target="_blank" class="btn btn-outline-secondary btn-sm py-0" title="View"><i class="bi bi-eye"></i></a>
-              <a href="{{ url_for('admin.attraction_edit', id=attraction.id) }}" class="btn btn-outline-secondary btn-sm py-0" title="Edit"><i class="bi bi-pencil"></i></a>
-              <form method="POST" action="{{ url_for('admin.attraction_regen_qr', id=attraction.id) }}" class="d-inline">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button class="btn btn-outline-secondary btn-sm py-0" title="Regen QR"><i class="bi bi-qr-code"></i></button>
-              </form>
-              <form method="POST" action="{{ url_for('admin.attraction_delete', id=attraction.id) }}" class="d-inline" onsubmit="return confirm('Delete {{ attraction.name }}?')">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button class="btn btn-outline-danger btn-sm py-0" title="Delete"><i class="bi bi-trash"></i></button>
-              </form>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 admin-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Featured</th>
+            <th>Active</th>
+            <th>Views</th>
+            <th>QR</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for attraction in attractions %}
+          <tr>
+            <td>
+              <img src="{{ attraction.image_url | image_src }}" 
+                   width="50" 
+                   height="40" 
+                   style="object-fit:cover;border-radius:6px" 
+                   onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'"
+                   alt="{{ attraction.name }}">
+            </td>
+            <td>
+              <div class="fw-semibold small text-blue">{{ attraction.name }}</div>
+              <div class="text-muted" style="font-size:.7rem">{{ attraction.address }}</div>
+            </td>
+            <td class="small">{{ attraction.category.name if attraction.category else '—' }}</td>
+            <td class="small">
+              {% if attraction.ticket_price == 0 %}Free{% else %}₦{{ attraction.ticket_price }}{% endif %}
+            </td>
+            <td>
+              {% if attraction.featured %}
+                <i class="bi bi-star-fill text-gold"></i>
+              {% else %}
+                <i class="bi bi-star text-muted"></i>
+              {% endif %}
+            </td>
+            <td>
+              {% if attraction.active %}
+                <span class="badge bg-success text-white" style="font-size:.65rem">Active</span>
+              {% else %}
+                <span class="badge bg-danger text-white" style="font-size:.65rem">Inactive</span>
+              {% endif %}
+            </td>
+            <td class="small text-muted">{{ attraction.views or 0 }}</td>
+            <td>
+              {% if attraction.qr_code_record and attraction.qr_code_record.qr_image_path %}
+                <img src="{{ attraction.qr_code_record.qr_image_path }}" width="30" height="30" title="Scanned {{ attraction.qr_code_record.scanned_count or 0 }}x" alt="QR">
+              {% else %}
+                <span class="text-muted small">None</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="d-flex gap-1">
+                <a href="{{ url_for('attractions.detail', id=attraction.id) }}" target="_blank" class="btn btn-outline-secondary btn-sm py-0" title="View"><i class="bi bi-eye"></i></a>
+                <a href="{{ url_for('admin.attraction_edit', id=attraction.id) }}" class="btn btn-outline-secondary btn-sm py-0" title="Edit"><i class="bi bi-pencil"></i></a>
+                <form method="POST" action="{{ url_for('admin.attraction_regen_qr', id=attraction.id) }}" class="d-inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-outline-secondary btn-sm py-0" title="Regen QR"><i class="bi bi-qr-code"></i></button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.attraction_delete', id=attraction.id) }}" class="d-inline" onsubmit="return confirm('Delete {{ attraction.name }}?')">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-outline-danger btn-sm py-0" title="Delete"><i class="bi bi-trash"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 

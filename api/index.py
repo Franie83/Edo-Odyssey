@@ -2,7 +2,7 @@ import sys
 import os
 import json
 from datetime import datetime
-from sqlalchemy import text  # ADD THIS IMPORT
+from sqlalchemy import text
 
 # Force production mode
 os.environ['FLASK_ENV'] = 'production'
@@ -32,7 +32,6 @@ def parse_date(date_str):
         return None
     try:
         if isinstance(date_str, str):
-            # Handle various date formats
             if 'T' in date_str:
                 return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
             else:
@@ -49,7 +48,7 @@ def parse_date(date_str):
 def serve_static(filename):
     return send_from_directory('app/static', filename)
 
-# Health check - FIXED with text()
+# Health check
 @app.route('/health')
 def health():
     try:
@@ -74,7 +73,6 @@ def migrate():
         with app.app_context():
             db.create_all()
             
-            # Create admin user
             if not User.query.filter_by(email="admin@edo.gov.ng").first():
                 admin = User(
                     email="admin@edo.gov.ng",
@@ -88,7 +86,6 @@ def migrate():
                 db.session.add(admin)
                 db.session.commit()
             
-            # Create categories
             categories = [
                 {"name": "History & Museum", "type": "attraction", "icon": "bi-building-fill", "color": "#1a3a6b"},
                 {"name": "UNESCO Heritage", "type": "attraction", "icon": "bi-globe", "color": "#c9a227"},
@@ -112,11 +109,10 @@ def migrate():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# Import data endpoint
+# Import data endpoint - FIXED QR CODE HANDLING
 @app.route('/import-data')
 def import_data():
     try:
-        # Check if data file exists
         data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_export.json')
         
         if not os.path.exists(data_file):
@@ -132,22 +128,21 @@ def import_data():
         imported_count = 0
         skipped_count = 0
         
+        # Fields to skip (auto-generated)
+        skip_fields = ['id', 'uuid', 'created_at', 'updated_at', 'deleted_at', 'last_scanned', 'scanned_at']
+        
         with app.app_context():
             # Import Users
             if 'users' in data:
                 for item in data['users']:
                     existing = User.query.filter_by(email=item['email']).first()
                     if not existing:
-                        # Parse date fields
                         if 'last_login' in item:
                             item['last_login'] = parse_date(item['last_login'])
                         if 'deleted_at' in item:
                             item['deleted_at'] = parse_date(item['deleted_at'])
-                        
-                        item.pop('id', None)
-                        item.pop('uuid', None)
-                        item.pop('created_at', None)
-                        item.pop('updated_at', None)
+                        for field in skip_fields:
+                            item.pop(field, None)
                         new_user = User(**item)
                         db.session.add(new_user)
                         imported_count += 1
@@ -160,11 +155,8 @@ def import_data():
                 for item in data['categories']:
                     existing = Category.query.filter_by(name=item['name']).first()
                     if not existing:
-                        item.pop('id', None)
-                        item.pop('uuid', None)
-                        item.pop('created_at', None)
-                        item.pop('updated_at', None)
-                        item.pop('deleted_at', None)
+                        for field in skip_fields:
+                            item.pop(field, None)
                         new_cat = Category(**item)
                         db.session.add(new_cat)
                         imported_count += 1
@@ -177,11 +169,8 @@ def import_data():
                 for item in data['attractions']:
                     existing = Attraction.query.filter_by(name=item['name']).first()
                     if not existing:
-                        item.pop('id', None)
-                        item.pop('uuid', None)
-                        item.pop('created_at', None)
-                        item.pop('updated_at', None)
-                        item.pop('deleted_at', None)
+                        for field in skip_fields:
+                            item.pop(field, None)
                         new_attraction = Attraction(**item)
                         db.session.add(new_attraction)
                         imported_count += 1
@@ -194,11 +183,8 @@ def import_data():
                 for item in data['guides']:
                     existing = Guide.query.filter_by(user_id=item.get('user_id')).first()
                     if not existing:
-                        item.pop('id', None)
-                        item.pop('uuid', None)
-                        item.pop('created_at', None)
-                        item.pop('updated_at', None)
-                        item.pop('deleted_at', None)
+                        for field in skip_fields:
+                            item.pop(field, None)
                         new_guide = Guide(**item)
                         db.session.add(new_guide)
                         imported_count += 1
@@ -211,11 +197,8 @@ def import_data():
                 for item in data['hotels']:
                     existing = Hotel.query.filter_by(name=item['name']).first()
                     if not existing:
-                        item.pop('id', None)
-                        item.pop('uuid', None)
-                        item.pop('created_at', None)
-                        item.pop('updated_at', None)
-                        item.pop('deleted_at', None)
+                        for field in skip_fields:
+                            item.pop(field, None)
                         new_hotel = Hotel(**item)
                         db.session.add(new_hotel)
                         imported_count += 1
@@ -228,11 +211,8 @@ def import_data():
                 for item in data['restaurants']:
                     existing = Restaurant.query.filter_by(name=item['name']).first()
                     if not existing:
-                        item.pop('id', None)
-                        item.pop('uuid', None)
-                        item.pop('created_at', None)
-                        item.pop('updated_at', None)
-                        item.pop('deleted_at', None)
+                        for field in skip_fields:
+                            item.pop(field, None)
                         new_restaurant = Restaurant(**item)
                         db.session.add(new_restaurant)
                         imported_count += 1
@@ -249,11 +229,8 @@ def import_data():
                             item['date'] = parse_date(item['date'])
                         if 'end_date' in item:
                             item['end_date'] = parse_date(item['end_date'])
-                        item.pop('id', None)
-                        item.pop('uuid', None)
-                        item.pop('created_at', None)
-                        item.pop('updated_at', None)
-                        item.pop('deleted_at', None)
+                        for field in skip_fields:
+                            item.pop(field, None)
                         new_event = Event(**item)
                         db.session.add(new_event)
                         imported_count += 1
@@ -276,11 +253,8 @@ def import_data():
                             item['confirmed_at'] = parse_date(item['confirmed_at'])
                         if 'completed_at' in item:
                             item['completed_at'] = parse_date(item['completed_at'])
-                        item.pop('id', None)
-                        item.pop('uuid', None)
-                        item.pop('created_at', None)
-                        item.pop('updated_at', None)
-                        item.pop('deleted_at', None)
+                        for field in skip_fields:
+                            item.pop(field, None)
                         new_booking = Booking(**item)
                         db.session.add(new_booking)
                         imported_count += 1
@@ -291,25 +265,24 @@ def import_data():
             # Import Reviews
             if 'reviews' in data:
                 for item in data['reviews']:
-                    item.pop('id', None)
-                    item.pop('uuid', None)
-                    item.pop('created_at', None)
-                    item.pop('updated_at', None)
-                    item.pop('deleted_at', None)
+                    for field in skip_fields:
+                        item.pop(field, None)
                     new_review = Review(**item)
                     db.session.add(new_review)
                     imported_count += 1
                 db.session.commit()
             
-            # Import QR Codes
+            # Import QR Codes - FIXED
             if 'qr_codes' in data:
+                # Define valid QRCode fields
+                valid_qr_fields = ['attraction_id', 'code', 'qr_image_path', 'url', 'scanned_count', 'status']
                 for item in data['qr_codes']:
-                    item.pop('id', None)
-                    item.pop('created_at', None)
-                    item.pop('updated_at', None)
-                    new_qr = QRCode(**item)
-                    db.session.add(new_qr)
-                    imported_count += 1
+                    # Filter only valid fields
+                    qr_data = {k: v for k, v in item.items() if k in valid_qr_fields}
+                    if qr_data:
+                        new_qr = QRCode(**qr_data)
+                        db.session.add(new_qr)
+                        imported_count += 1
                 db.session.commit()
         
         return jsonify({
@@ -333,7 +306,6 @@ with app.app_context():
         db.create_all()
         print("✅ Database tables verified")
         
-        # Create admin user if not exists
         if not User.query.filter_by(email="admin@edo.gov.ng").first():
             admin = User(
                 email="admin@edo.gov.ng",

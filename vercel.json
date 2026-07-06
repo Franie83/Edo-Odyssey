@@ -2,18 +2,26 @@
   "version": 2,
   "builds": [
     {
-      "src": "run.py",
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/migrate.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/migrate",
+      "dest": "api/migrate.py"
+    },
+    {
       "src": "/(.*)",
-      "dest": "run.py"
+      "dest": "api/index.py"
     }
-  ],
-  "env": {
-    "FLASK_ENV": "production",
-    "PYTHON_VERSION": "3.12"
-  }
+  ]
 }

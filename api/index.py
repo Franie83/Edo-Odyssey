@@ -2,6 +2,7 @@ import sys
 import os
 import json
 from datetime import datetime
+from sqlalchemy import text  # ADD THIS IMPORT
 
 # Force production mode
 os.environ['FLASK_ENV'] = 'production'
@@ -48,13 +49,12 @@ def parse_date(date_str):
 def serve_static(filename):
     return send_from_directory('app/static', filename)
 
-# Health check
+# Health check - FIXED with text()
 @app.route('/health')
 def health():
     try:
-        # Use session.execute for SQLAlchemy 2.0
         with app.app_context():
-            db.session.execute("SELECT 1")
+            db.session.execute(text("SELECT 1"))
         return jsonify({
             "status": "healthy",
             "database": "connected",

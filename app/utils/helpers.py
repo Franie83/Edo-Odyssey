@@ -8,10 +8,89 @@ from PIL import Image
 from ..extensions import db
 from ..models.models import AuditLog, Notification
 
+# Try to import Cloudinary
+try:
+    import cloudinary
+    import cloudinary.uploader
+    import cloudinary.api
+    CLOUDINARY_AVAILABLE = True
+except ImportError:
+    CLOUDINARY_AVAILABLE = False
+    print("Cloudinary not installed - cloudinary features disabled")
+
 def allowed_file(filename):
     """Check if the file extension is allowed"""
     allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'pdf', 'doc', 'docx'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
+def init_cloudinary():
+    """Initialize Cloudinary with app config"""
+    if not CLOUDINARY_AVAILABLE:
+        return False
+    
+    try:
+        cloudinary.config(
+            cloud_name=current_app.config.get('CLOUDINARY_CLOUD_NAME'),
+            api_key=current_app.config.get('CLOUDINARY_API_KEY'),
+            api_secret=current_app.config.get('CLOUDINARY_API_SECRET'),
+            secure=True
+        )
+        return True
+    except Exception as e:
+        print(f"Cloudinary init error: {e}")
+        return False
+
+def upload_to_cloudinary(file, folder="attractions"):
+    """Upload a file to Cloudinary and return the URL"""
+    if not file or not CLOUDINARY_AVAILABLE:
+        return None
+    
+    try:
+        init_cloudinary()
+        result = cloudinary.uploader.upload(
+            file,
+            folder=f"edo_odyssey/{folder}",
+            use_filename=True,
+            unique_filename=True,
+            overwrite=True,
+            resource_type="image",
+            transformation=[
+                {'width': 1200, 'height': 800, 'crop': 'limit'},
+                {'quality': 'auto:good'},
+                {'fetch_format': 'auto'}
+            ]
+        )
+        return result.get('secure_url')
+    except Exception as e:
+        print(f"Cloudinary upload error: {e}")
+        return None
+
+def delete_from_cloudinary(public_id):
+    """Delete a file from Cloudinary"""
+    if not CLOUDINARY_AVAILABLE:
+        return False
+    
+    try:
+        init_cloudinary()
+        result = cloudinary.uploader.destroy(public_id)
+        return result.get('result') == 'ok'
+    except Exception as e:
+        print(f"Cloudinary delete error: {e}")
+        return False
+
+def get_cloudinary_url(public_id, options=None):
+    """Get a Cloudinary URL with transformations"""
+    if not CLOUDINARY_AVAILABLE:
+        return None
+    
+    try:
+        init_cloudinary()
+        if options:
+            return cloudinary.utils.cloudinary_url(public_id, **options)[0]
+        return cloudinary.utils.cloudinary_url(public_id)[0]
+    except Exception as e:
+        print(f"Cloudinary URL error: {e}")
+        return None
 
 def save_uploaded_file(file, folder="attractions", resize=True, max_width=1200, max_height=800, quality=85):
     """
@@ -21,6 +100,14 @@ def save_uploaded_file(file, folder="attractions", resize=True, max_width=1200, 
     if not file or not file.filename:
         return None
     
+    # Check if we should use Cloudinary (for production/Vercel)
+    use_cloudinary = current_app.config.get('CLOUDINARY_CLOUD_NAME')
+    
+    if use_cloudinary:
+        # Upload to Cloudinary
+        return upload_to_cloudinary(file, folder)
+    
+    # Local storage fallback
     # Create directory if it doesn't exist
     upload_folder = current_app.config.get("UPLOAD_FOLDER", os.path.join(current_app.root_path, "static/uploads"))
     folder_path = os.path.join(upload_folder, folder)
@@ -67,11 +154,30 @@ def save_uploaded_file(file, folder="attractions", resize=True, max_width=1200, 
     return f"/static/uploads/{folder}/{filename}"
 
 def delete_uploaded_file(file_url, folder="attractions"):
-    """Delete an uploaded file from the filesystem"""
+    """Delete an uploaded file from the filesystem or Cloudinary"""
     if not file_url:
         return False
     
-    # Extract filename from URL
+    # Check if it's a Cloudinary URL
+    if CLOUDINARY_AVAILABLE and 'cloudinary' in file_url:
+        try:
+            # Extract public_id from URL
+            # Example: https://res.cloudinary.com/cloud_name/image/upload/v123456/edo_odyssey/attractions/filename.jpg
+            parts = file_url.split('/')
+            # Get the part after 'upload/'
+            upload_index = -1
+            for i, part in enumerate(parts):
+                if part == 'upload':
+                    upload_index = i
+                    break
+            
+            if upload_index != -1 and upload_index + 1 < len(parts):
+                public_id = '/'.join(parts[upload_index + 1:]).split('.')[0]
+                return delete_from_cloudinary(public_id)
+        except Exception as e:
+            print(f"Cloudinary delete error: {e}")
+    
+    # Local file deletion
     filename = os.path.basename(file_url)
     upload_folder = current_app.config.get("UPLOAD_FOLDER", os.path.join(current_app.root_path, "static/uploads"))
     filepath = os.path.join(upload_folder, folder, filename)

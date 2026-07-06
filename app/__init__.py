@@ -156,7 +156,7 @@ def create_app(config_name=None):
     # Create directories
     create_directories(app)
     
-    # Template filter for image URLs (handles Google Drive and missing images)
+    # Template filter for image URLs (handles Google Drive, Cloudinary, and missing images)
     @app.template_filter('image_src')
     def image_src_filter(url):
         """Convert various image URLs to displayable URLs"""
@@ -164,6 +164,10 @@ def create_app(config_name=None):
         
         if not url:
             return url_for('static', filename='images/placeholder.jpg')
+        
+        # Handle Cloudinary URLs - they should work as-is
+        if url and 'cloudinary.com' in url:
+            return url
         
         # Handle Google Drive URLs
         if "drive.google.com/file/d/" in url:
@@ -183,7 +187,7 @@ def create_app(config_name=None):
         
         # Handle local upload paths
         if url and url.startswith('/static/uploads/'):
-            # Check if the file exists on Vercel (using /tmp)
+            # Check if the file exists
             file_path = url.lstrip('/')
             # Try both locations: app/static and /tmp
             possible_paths = [
@@ -194,11 +198,14 @@ def create_app(config_name=None):
                 if os.path.exists(path):
                     return url
             
-            # Check if it's a valid URL with http
+            # If file doesn't exist locally, check if it's a full URL
             if url.startswith('http://') or url.startswith('https://'):
                 return url
+            
+            # Otherwise return placeholder
+            return url_for('static', filename='images/placeholder.jpg')
         
-        # Check if it's a full URL
+        # Check if it's a full URL (http/https)
         if url and (url.startswith('http://') or url.startswith('https://')):
             return url
         

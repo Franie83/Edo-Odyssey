@@ -18,10 +18,17 @@ class Config:
         'pool_recycle': 300,
     }
     
+    # Upload configuration - For Vercel, use /tmp
     UPLOAD_FOLDER = '/tmp/uploads'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
     BASE_URL = os.environ.get('BASE_URL', 'https://edo-odyssey.vercel.app')
     
+    # Cloudinary configuration for image uploads
+    CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
+    CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
+    CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
+    
+    # Session configuration
     SESSION_COOKIE_SECURE = True
     REMEMBER_COOKIE_SECURE = True
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
@@ -40,6 +47,7 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SECURE = True
     REMEMBER_COOKIE_SECURE = True
     BASE_URL = os.environ.get('BASE_URL', 'https://edo-odyssey.vercel.app')
+    WTF_CSRF_ENABLED = True
 
 config = {
     'development': DevelopmentConfig,

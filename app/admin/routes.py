@@ -15,7 +15,7 @@ from ..models.models import (User, Attraction, Guide, Hotel, Restaurant,
                               Partner, Advertisement, Payment, HotelRoom,
                               RestaurantMenu, NewsComment)
 from ..utils.decorators import admin_required
-from ..utils.helpers import log_action, save_uploaded_file, delete_uploaded_file, allowed_file, create_notification, award_heritage_points 
+from ..utils.helpers import log_action, save_uploaded_file, delete_uploaded_file, allowed_file, create_notification, award_heritage_points, upload_to_cloudinary
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -179,17 +179,15 @@ def attraction_create():
         try:
             user_id = request.form.get("user_id", type=int)
             
-            # Update user role to Attraction Manager (optional)
-            if user_id:
-                user = User.query.get(user_id)
-                # You can add a new role "Attraction Manager" or keep as Tourist
-                # For now, we'll just link the user
-            
-            # Handle image upload - only from file upload
+            # Handle image upload - Use Cloudinary if available, fallback to local
             image = request.files.get("image")
             image_url = None
             if image and allowed_file(image.filename):
-                image_url = save_uploaded_file(image, "attractions")
+                # Check if Cloudinary is configured
+                if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+                    image_url = upload_to_cloudinary(image, "attractions")
+                else:
+                    image_url = save_uploaded_file(image, "attractions")
             
             a = Attraction(
                 user_id=user_id,  # Link attraction to user
@@ -226,6 +224,7 @@ def attraction_create():
     
     return render_template("admin/attraction_form.html", attraction=None, categories=categories, users=users, title="New Attraction")
 
+
 @admin_bp.route("/attractions/<int:id>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -237,7 +236,7 @@ def attraction_edit(id):
     if request.method == "POST":
         try:
             # Update basic fields
-            a.user_id = request.form.get("user_id", type=int)  # Add this
+            a.user_id = request.form.get("user_id", type=int)
             a.name = request.form.get("name", a.name).strip()
             a.category_id = request.form.get("category_id", a.category_id, type=int)
             a.description = request.form.get("description", a.description)
@@ -252,14 +251,17 @@ def attraction_edit(id):
             a.featured = request.form.get("featured") == "on"
             a.active = request.form.get("active") == "on"
             
-            # Handle image upload - only from file upload
+            # Handle image upload - Use Cloudinary if available
             image = request.files.get("image")
             if image and allowed_file(image.filename):
                 # Delete old image if exists
                 if a.image_url:
                     delete_uploaded_file(a.image_url, "attractions")
                 # Save new image
-                a.image_url = save_uploaded_file(image, "attractions")
+                if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+                    a.image_url = upload_to_cloudinary(image, "attractions")
+                else:
+                    a.image_url = save_uploaded_file(image, "attractions")
             
             db.session.commit()
             
@@ -276,6 +278,7 @@ def attraction_edit(id):
             db.session.rollback()
     
     return render_template("admin/attraction_form.html", attraction=a, categories=categories, users=users, title="Edit Attraction")
+
 
 @admin_bp.route("/attractions/<int:id>/delete", methods=["POST"])
 @login_required
@@ -389,7 +392,7 @@ def guides():
             (User.first_name.ilike(f"%{q}%")) | 
             (User.last_name.ilike(f"%{q}%")) | 
             (User.email.ilike(f"%{q}%")) |
-            (Guide.phone.ilike(f"%{q}%"))  # <-- Added phone search
+            (Guide.phone.ilike(f"%{q}%"))
         )
     if status_filter:
         query = query.filter_by(verification_status=status_filter)
@@ -464,6 +467,7 @@ def guide_create():
     
     return render_template("admin/guide_form.html", guide=None, users=available_users, title="Add Guide")
 
+
 @admin_bp.route("/guides/<int:id>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -491,6 +495,7 @@ def guide_edit(id):
             flash(f"Error updating guide: {str(e)}", "danger")
     
     return render_template("admin/guide_form.html", guide=g, title="Edit Guide")
+
 
 @admin_bp.route("/guides/<int:id>/verify", methods=["POST"])
 @login_required
@@ -550,7 +555,10 @@ def hotel_create():
         image = request.files.get("image")
         image_url = None
         if image and allowed_file(image.filename):
-            image_url = save_uploaded_file(image, "hotels")
+            if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+                image_url = upload_to_cloudinary(image, "hotels")
+            else:
+                image_url = save_uploaded_file(image, "hotels")
         
         # Update user role to Hotel
         user = User.query.get(user_id)
@@ -605,7 +613,10 @@ def hotel_edit(id):
         if image and allowed_file(image.filename):
             if h.image_url:
                 delete_uploaded_file(h.image_url, "hotels")
-            h.image_url = save_uploaded_file(image, "hotels")
+            if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+                h.image_url = upload_to_cloudinary(image, "hotels")
+            else:
+                h.image_url = save_uploaded_file(image, "hotels")
         db.session.commit()
         log_action(f"Admin edited hotel #{id}", module="admin.hotels", record_id=id)
         flash("Hotel updated.", "success")
@@ -660,7 +671,10 @@ def restaurant_create():
         image = request.files.get("image")
         image_url = None
         if image and allowed_file(image.filename):
-            image_url = save_uploaded_file(image, "restaurants")
+            if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+                image_url = upload_to_cloudinary(image, "restaurants")
+            else:
+                image_url = save_uploaded_file(image, "restaurants")
         
         # Update user role to Restaurant
         user = User.query.get(user_id)
@@ -691,6 +705,7 @@ def restaurant_create():
     
     return render_template("admin/restaurant_form.html", restaurant=None, users=available_users, title="New Restaurant")
 
+
 @admin_bp.route("/restaurants/<int:id>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -711,7 +726,10 @@ def restaurant_edit(id):
         if image and allowed_file(image.filename):
             if r.image_url:
                 delete_uploaded_file(r.image_url, "restaurants")
-            r.image_url = save_uploaded_file(image, "restaurants")
+            if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+                r.image_url = upload_to_cloudinary(image, "restaurants")
+            else:
+                r.image_url = save_uploaded_file(image, "restaurants")
         db.session.commit()
         log_action(f"Admin edited restaurant #{id}", module="admin.restaurants", record_id=id)
         flash("Restaurant updated.", "success")
@@ -759,7 +777,10 @@ def event_create():
         image = request.files.get("image")
         image_url = None
         if image and allowed_file(image.filename):
-            image_url = save_uploaded_file(image, "events")
+            if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+                image_url = upload_to_cloudinary(image, "events")
+            else:
+                image_url = save_uploaded_file(image, "events")
         
         date_str = request.form.get("date", "")
         end_str = request.form.get("end_date", "")
@@ -800,6 +821,7 @@ def event_create():
     
     return render_template("admin/event_form.html", event=None, users=users, title="New Event")
 
+
 @admin_bp.route("/events/<int:id>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -808,7 +830,7 @@ def event_edit(id):
     users = User.query.filter(User.status == 'active').all()
     
     if request.method == "POST":
-        e.user_id = request.form.get("user_id", type=int)  # Add this
+        e.user_id = request.form.get("user_id", type=int)
         e.name = request.form.get("name", e.name).strip()
         e.description = request.form.get("description", e.description)
         e.location = request.form.get("location", e.location)
@@ -841,7 +863,10 @@ def event_edit(id):
         if image and allowed_file(image.filename):
             if e.image_url:
                 delete_uploaded_file(e.image_url, "events")
-            e.image_url = save_uploaded_file(image, "events")
+            if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+                e.image_url = upload_to_cloudinary(image, "events")
+            else:
+                e.image_url = save_uploaded_file(image, "events")
         
         db.session.commit()
         log_action(f"Admin edited event #{id}", module="admin.events", record_id=id)
@@ -849,6 +874,7 @@ def event_edit(id):
         return redirect(url_for("admin.events"))
     
     return render_template("admin/event_form.html", event=e, users=users, title="Edit Event")
+
 
 @admin_bp.route("/events/<int:id>/delete", methods=["POST"])
 @login_required
@@ -886,7 +912,11 @@ def news_create():
         image = request.files.get("image")
         image_url = None
         if image and allowed_file(image.filename):
-            image_url = save_uploaded_file(image, "news")
+            if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+                image_url = upload_to_cloudinary(image, "news")
+            else:
+                image_url = save_uploaded_file(image, "news")
+        
         from ..utils.helpers import slugify
         import random
         title = request.form.get("title", "").strip()
@@ -925,7 +955,10 @@ def news_edit(id):
         if image and allowed_file(image.filename):
             if n.image_url:
                 delete_uploaded_file(n.image_url, "news")
-            n.image_url = save_uploaded_file(image, "news")
+            if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+                n.image_url = upload_to_cloudinary(image, "news")
+            else:
+                n.image_url = save_uploaded_file(image, "news")
         db.session.commit()
         log_action(f"Admin edited news #{id}", module="admin.news", record_id=id)
         flash("Article updated.", "success")
@@ -1073,6 +1106,7 @@ def get_booking_target(booking):
         if event:
             return event.owner
     return None
+
 
 # ─── REVIEWS ─────────────────────────────────────────────────────────────────
 

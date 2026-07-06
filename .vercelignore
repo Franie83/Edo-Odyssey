@@ -14,3 +14,7 @@ migrations/
 instance/
 uploads/
 static/uploads/
+scripts/
+check_*.py
+fix_*.py
+mark_*.py

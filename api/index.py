@@ -25,6 +25,14 @@ def health():
         "database": "connected",
         "static_files": "available"
     })
+@app.route('/import-data')
+def import_data():
+    try:
+        from .import import run_import
+        result = run_import()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # Migration endpoint
 @app.route('/migrate')

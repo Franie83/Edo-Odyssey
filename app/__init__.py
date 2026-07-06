@@ -1,4 +1,3 @@
-# app/__init__.py
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -190,7 +189,7 @@ def create_app(config_name=None):
             
             return {
                 "settings": settings,
-                "cms": settings      # Alias for templates using 'cms'
+                "cms": settings
             }
             
         except Exception as e:

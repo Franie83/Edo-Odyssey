@@ -322,4 +322,29 @@ with app.app_context():
     except Exception as e:
         print(f"⚠️ Database error: {e}")
 
+@app.route('/debug-images')
+def debug_images():
+    try:
+        from app.models.models import Attraction
+        from flask import jsonify
+        
+        images = []
+        attractions = Attraction.query.limit(10).all()
+        for att in attractions:
+            images.append({
+                "id": att.id,
+                "name": att.name,
+                "image_url": att.image_url,
+                "is_cloudinary": 'cloudinary.com' in att.image_url if att.image_url else False,
+                "is_local": att.image_url.startswith('/static/') if att.image_url else False,
+                "is_https": att.image_url.startswith('https://') if att.image_url else False,
+            })
+        
+        return jsonify({
+            "total": len(images),
+            "images": images
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Vercel requires the app to be named 'app'

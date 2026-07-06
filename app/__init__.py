@@ -1,8 +1,12 @@
-from flask import Flask, render_template
+import os
+# Set instance path to /tmp for Vercel
+os.makedirs('/tmp/instance', exist_ok=True)
+os.makedirs('/tmp/uploads', exist_ok=True)
+
+from flask import Flask, render_template, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user
-import os
 import re
 from .config import config
 from .extensions import db, migrate, login_manager, csrf
@@ -28,6 +32,10 @@ def create_app(config_name=None):
     
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+    
+    # Force instance path to /tmp for Vercel (read-only filesystem fix)
+    app.instance_path = '/tmp/instance'
+    os.makedirs(app.instance_path, exist_ok=True)
     
     # Initialize extensions
     db.init_app(app)
@@ -239,16 +247,18 @@ def create_app(config_name=None):
 
 def create_directories(app):
     """Create necessary directories"""
+    # Use /tmp for Vercel (writable)
+    upload_dir = '/tmp/uploads'
     directories = [
-        os.path.join(app.root_path, 'static/uploads'),
-        os.path.join(app.root_path, 'static/uploads/attractions'),
-        os.path.join(app.root_path, 'static/uploads/qr_codes'),
-        os.path.join(app.root_path, 'static/uploads/hotels'),
-        os.path.join(app.root_path, 'static/uploads/restaurants'),
-        os.path.join(app.root_path, 'static/uploads/events'),
-        os.path.join(app.root_path, 'static/uploads/guides'),
-        os.path.join(app.root_path, 'static/uploads/news'),
-        os.path.join(app.root_path, 'static/uploads/users'),
+        upload_dir,
+        os.path.join(upload_dir, 'attractions'),
+        os.path.join(upload_dir, 'qr_codes'),
+        os.path.join(upload_dir, 'hotels'),
+        os.path.join(upload_dir, 'restaurants'),
+        os.path.join(upload_dir, 'events'),
+        os.path.join(upload_dir, 'guides'),
+        os.path.join(upload_dir, 'news'),
+        os.path.join(upload_dir, 'users'),
     ]
     for directory in directories:
         os.makedirs(directory, exist_ok=True)

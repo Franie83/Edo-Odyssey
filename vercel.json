@@ -3,13 +3,6 @@
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxDuration": 10
-      }
-    },
-    {
-      "src": "api/migrate.py",
       "use": "@vercel/python"
     }
   ],
@@ -17,10 +10,6 @@
     {
       "src": "/static/(.*)",
       "dest": "/static/$1"
-    },
-    {
-      "src": "/migrate",
-      "dest": "api/migrate.py"
     },
     {
       "src": "/(.*)",

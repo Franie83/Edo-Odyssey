@@ -1,6 +1,13 @@
 import sys
 import os
 import json
+from datetime import datetime
+
+# Force production mode
+os.environ['FLASK_ENV'] = 'production'
+
+# Debug: Print database URL
+print(f"DATABASE_URL from env: {os.environ.get('DATABASE_URL', 'NOT SET')}")
 
 os.makedirs('/tmp/instance', exist_ok=True)
 os.makedirs('/tmp/uploads', exist_ok=True)
@@ -12,7 +19,29 @@ from app.extensions import db
 from flask import send_from_directory, jsonify
 from app.models.models import *
 
-app = create_app()
+# Create app with production config
+app = create_app('production')
+
+# Debug: Print the database URI being used
+print(f"SQLALCHEMY_DATABASE_URI: {app.config.get('SQLALCHEMY_DATABASE_URI', 'NOT SET')}")
+
+# Helper function to parse dates
+def parse_date(date_str):
+    if not date_str:
+        return None
+    try:
+        if isinstance(date_str, str):
+            # Handle various date formats
+            if 'T' in date_str:
+                return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+            else:
+                return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S.%f')
+        return date_str
+    except:
+        try:
+            return datetime.strptime(str(date_str), '%Y-%m-%d %H:%M:%S')
+        except:
+            return None
 
 # Serve static files
 @app.route('/static/<path:filename>')
@@ -23,8 +52,9 @@ def serve_static(filename):
 @app.route('/health')
 def health():
     try:
-        # Test database connection
-        db.engine.execute("SELECT 1")
+        # Use session.execute for SQLAlchemy 2.0
+        with app.app_context():
+            db.session.execute("SELECT 1")
         return jsonify({
             "status": "healthy",
             "database": "connected",
@@ -108,11 +138,16 @@ def import_data():
                 for item in data['users']:
                     existing = User.query.filter_by(email=item['email']).first()
                     if not existing:
+                        # Parse date fields
+                        if 'last_login' in item:
+                            item['last_login'] = parse_date(item['last_login'])
+                        if 'deleted_at' in item:
+                            item['deleted_at'] = parse_date(item['deleted_at'])
+                        
                         item.pop('id', None)
                         item.pop('uuid', None)
                         item.pop('created_at', None)
                         item.pop('updated_at', None)
-                        item.pop('deleted_at', None)
                         new_user = User(**item)
                         db.session.add(new_user)
                         imported_count += 1
@@ -210,6 +245,10 @@ def import_data():
                 for item in data['events']:
                     existing = Event.query.filter_by(name=item['name']).first()
                     if not existing:
+                        if 'date' in item:
+                            item['date'] = parse_date(item['date'])
+                        if 'end_date' in item:
+                            item['end_date'] = parse_date(item['end_date'])
                         item.pop('id', None)
                         item.pop('uuid', None)
                         item.pop('created_at', None)
@@ -227,6 +266,16 @@ def import_data():
                 for item in data['bookings']:
                     existing = Booking.query.filter_by(reference_code=item.get('reference_code')).first()
                     if not existing:
+                        if 'start_date' in item:
+                            item['start_date'] = parse_date(item['start_date'])
+                        if 'end_date' in item:
+                            item['end_date'] = parse_date(item['end_date'])
+                        if 'approved_at' in item:
+                            item['approved_at'] = parse_date(item['approved_at'])
+                        if 'confirmed_at' in item:
+                            item['confirmed_at'] = parse_date(item['confirmed_at'])
+                        if 'completed_at' in item:
+                            item['completed_at'] = parse_date(item['completed_at'])
                         item.pop('id', None)
                         item.pop('uuid', None)
                         item.pop('created_at', None)

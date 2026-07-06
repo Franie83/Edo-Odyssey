@@ -1,5 +1,5 @@
 import os
-# Set instance path to /tmp for Vercel
+# Set instance path to /tmp for Vercel/Railway
 os.makedirs('/tmp/instance', exist_ok=True)
 os.makedirs('/tmp/uploads', exist_ok=True)
 
@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user
 import re
-from .config import config
+from .config import config, get_config
 from .extensions import db, migrate, login_manager, csrf
 
 # Optional imports - will be loaded if available
@@ -27,16 +27,28 @@ except ImportError:
     print("flask-cors not installed - CORS features disabled")
 
 def create_app(config_name=None):
+    # Auto-detect environment
     if config_name is None:
-        config_name = os.environ.get('FLASK_ENV', 'default')
+        if os.environ.get('RAILWAY_ENVIRONMENT'):
+            config_name = 'railway'
+        elif os.environ.get('VERCEL_ENV'):
+            config_name = 'production'
+        else:
+            config_name = os.environ.get('FLASK_ENV', 'default')
     
     # Create app with static folder configuration
     app = Flask(__name__, 
                 static_folder='static',
                 static_url_path='/static')
-    app.config.from_object(config[config_name])
     
-    # Force instance path to /tmp for Vercel (read-only filesystem fix)
+    # Load config using get_config for Railway
+    if os.environ.get('RAILWAY_ENVIRONMENT'):
+        from .config import RailwayConfig
+        app.config.from_object(RailwayConfig)
+    else:
+        app.config.from_object(config[config_name])
+    
+    # Force instance path to /tmp for Vercel/Railway (read-only filesystem fix)
     app.instance_path = '/tmp/instance'
     os.makedirs(app.instance_path, exist_ok=True)
     
@@ -276,7 +288,7 @@ def create_app(config_name=None):
 
 def create_directories(app):
     """Create necessary directories"""
-    # Use /tmp for Vercel (writable)
+    # Use /tmp for Vercel/Railway (writable)
     upload_dir = '/tmp/uploads'
     directories = [
         upload_dir,

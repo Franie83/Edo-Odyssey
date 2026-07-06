@@ -30,7 +30,10 @@ def create_app(config_name=None):
     if config_name is None:
         config_name = os.environ.get('FLASK_ENV', 'default')
     
-    app = Flask(__name__)
+    # Create app with static folder configuration
+    app = Flask(__name__, 
+                static_folder='static',
+                static_url_path='/static')
     app.config.from_object(config[config_name])
     
     # Force instance path to /tmp for Vercel (read-only filesystem fix)

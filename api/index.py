@@ -10,9 +10,15 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import create_app
 from app.extensions import db
+from flask import send_from_directory
 
 # Create app
 app = create_app()
+
+# Serve static files directly (fallback)
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory('app/static', filename)
 
 # Create tables on startup
 with app.app_context():
